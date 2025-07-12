@@ -164,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: allThemes.map((t) {
             return RadioListTile(
-              title: Text(t.name),
+              title: Text(t.name, style: TextStyle(color: theme.textPrimary)),
               value: t.name,
               groupValue: theme.name,
               onChanged: (_) {

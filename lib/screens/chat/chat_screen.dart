@@ -208,77 +208,95 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: ListView(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(8),
-              children: messages
-                  .where((m) => !m.deleted)
-                  .map(
-                    (m) => MessageBubble(
-                      content: m.content ?? '',
-                      isMine: m.userId == currentUserId,
-                      senderName: m.sender.name,
-                      edited: m.edited,
-                      onLongPressWithPosition: m.userId == currentUserId
-                          ? (pos) => _showPopupMenu(m, pos)
-                          : null,
-                    ),
-                  )
-                  .toList(),
-            ),
+          // Фон
+          Positioned.fill(
+            child: Image.asset(theme.chatBackgroundPath, fit: BoxFit.cover),
           ),
-          Container(
-            color: theme.background,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 30,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      decoration: BoxDecoration(
-                        color: theme.inputBackground,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: TextField(
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: theme.textPrimary,
+
+          // Затемнение (опционально, можно убрать)
+          Positioned.fill(
+            child: Container(color: Colors.black.withOpacity(0.03)),
+          ),
+
+          // Основной контент
+          Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(8),
+                  children: messages
+                      .where((m) => !m.deleted)
+                      .map(
+                        (m) => MessageBubble(
+                          content: m.content ?? '',
+                          isMine: m.userId == currentUserId,
+                          senderName: m.sender.name,
+                          edited: m.edited,
+                          onLongPressWithPosition: m.userId == currentUserId
+                              ? (pos) => _showPopupMenu(m, pos)
+                              : null,
                         ),
-                        controller: _controller,
-                        focusNode: _focusNode,
-                        textAlignVertical: TextAlignVertical.center,
-                        decoration: InputDecoration(
-                          hintText: 'Сообщение',
-                          border: InputBorder.none,
-                          hintStyle: TextStyle(
-                            fontSize: 13,
-                            color: theme.textSecondary,
-                          ),
-                          isCollapsed: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
-                        ),
-                        onSubmitted: (_) => _sendMessage(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  CircleAvatar(
-                    backgroundColor: Colors.transparent,
-                    child: IconButton(
-                      icon: Icon(Icons.send, color: theme.sendButton),
-                      onPressed: _sendMessage,
-                    ),
-                  ),
-                ],
+                      )
+                      .toList(),
+                ),
               ),
-            ),
+              Container(
+                color: theme.chat_inputPanel_panelBg,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 30,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            color: theme.inputBackground,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: TextField(
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: theme.textPrimary,
+                            ),
+                            controller: _controller,
+                            focusNode: _focusNode,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: InputDecoration(
+                              hintText: 'Сообщение',
+                              border: InputBorder.none,
+                              hintStyle: TextStyle(
+                                fontSize: 13,
+                                color: theme.textSecondary,
+                              ),
+                              isCollapsed: true,
+                              contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                            ),
+                            onSubmitted: (_) => _sendMessage(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      CircleAvatar(
+                        backgroundColor: Colors.transparent,
+                        child: IconButton(
+                          icon: Icon(Icons.send, color: theme.sendButton),
+                          onPressed: _sendMessage,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

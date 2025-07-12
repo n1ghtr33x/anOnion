@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger/screens/main_screen.dart';
 import 'package:flutter_messenger/services/api_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../themes/theme_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -69,11 +72,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final theme = context.watch<ThemeProvider>().theme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.background,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -84,13 +86,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Icon(
                 Icons.person_add_alt,
                 size: 80,
-                color: theme.colorScheme.primary,
+                color: theme.sendButton,
               ),
               const SizedBox(height: 24),
               Text(
                 "Создание аккаунта",
                 textAlign: TextAlign.center,
-                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: theme.textPrimary,
+                ),
               ),
               const SizedBox(height: 24),
               if (_error != null)
@@ -99,7 +104,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     _error!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: theme.colorScheme.error),
+                    style: TextStyle(
+                      color: theme.errorAccent,
+                    ),
                   ),
                 ),
               _buildTextField(_email, "Email"),
@@ -114,21 +121,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onPressed: _register,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  backgroundColor: theme.colorScheme.primary,
+                  backgroundColor: theme.intro_accentText,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: Text(
                   "Зарегистрироваться",
-                  style: theme.textTheme.labelLarge?.copyWith(color: Colors.white),
+                  style: TextStyle(color: theme.intro_buttonText),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
                   "Уже есть аккаунт? Войти",
-                  style: TextStyle(color: theme.colorScheme.onBackground.withOpacity(0.6)),
+                  style: TextStyle(color: theme.intro_primaryText),
                 ),
               ),
             ],
@@ -143,8 +150,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String label, {
     bool obscure = false,
   }) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final theme = context.watch<ThemeProvider>().theme;
 
     return TextField(
       controller: controller,
@@ -152,10 +158,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: isDark ? Colors.grey[900] : Colors.grey[100],
+        fillColor: theme.bubbleOther,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        labelStyle: TextStyle(color: theme.textSecondary)
       ),
-      style: theme.textTheme.bodyMedium,
     );
   }
 }

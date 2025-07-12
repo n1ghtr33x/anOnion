@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_messenger/screens/auth/register_screen.dart';
 import 'package:flutter_messenger/screens/main_screen.dart';
 import 'package:flutter_messenger/services/api_service.dart';
+import 'package:provider/provider.dart';
+
+import '../../themes/theme_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,11 +41,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final theme = context.watch<ThemeProvider>().theme;
 
     return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
+      backgroundColor: theme.background,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -52,13 +54,14 @@ class _LoginScreenState extends State<LoginScreen> {
               Icon(
                 Icons.lock_outline,
                 size: 80,
-                color: theme.colorScheme.primary,
+                color: theme.intro_accentText,
               ),
               const SizedBox(height: 24),
               Text(
                 "Вход в аккаунт",
-                style: theme.textTheme.headlineMedium?.copyWith(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  color: theme.textPrimary,
                 ),
               ),
               const SizedBox(height: 24),
@@ -67,32 +70,36 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     _error!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.redAccent,
+                    style: TextStyle(
+                      color: theme.errorAccent,
                     ),
                   ),
                 ),
               TextField(
                 controller: _userController,
+                style: TextStyle(color: theme.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Логин',
                   filled: true,
-                  fillColor: theme.inputDecorationTheme.fillColor,
+                  fillColor: theme.bubbleOther,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  labelStyle: TextStyle(color: theme.textSecondary)
                 ),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passController,
+                style: TextStyle(color: theme.textPrimary),
                 decoration: InputDecoration(
                   labelText: 'Пароль',
                   filled: true,
-                  fillColor: theme.inputDecorationTheme.fillColor,
+                  fillColor: theme.bubbleOther,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
+                  labelStyle: TextStyle(color: theme.textSecondary)
                 ),
                 obscureText: true,
               ),
@@ -103,15 +110,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: theme.colorScheme.primary,
+                    backgroundColor: theme.intro_accentText,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: Text(
                     "Войти",
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: theme.intro_buttonText,
                     ),
                   ),
                 ),
@@ -125,8 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: Text(
                   "Регистрация",
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.disabledColor,
+                  style: TextStyle(
+                    color: theme.intro_primaryText,
                   ),
                 ),
               ),
