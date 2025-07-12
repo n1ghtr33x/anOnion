@@ -27,49 +27,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showCustomAboutDialog(BuildContext context) {
     final theme = Provider.of<ThemeProvider>(context, listen: false).theme;
+
     showDialog(
       context: context,
+      barrierColor: Colors.black.withOpacity(0.3), // мягкий фон как у Telegram
       builder: (ctx) => Dialog(
+        backgroundColor: theme.inputBackground.withOpacity(0.95),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 0,
         child: Container(
-          padding: const EdgeInsets.all(24.0),
-          color: theme.background,
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.message_rounded, size: 60, color: theme.sendButton),
-              const SizedBox(height: 16),
+              Icon(Icons.message_rounded, size: 48, color: theme.sendButton),
+              const SizedBox(height: 12),
               Text(
-                "Flutter Messenger",
+                "anOnion",
                 style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
                   color: theme.textPrimary,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 6),
               Text(
-                "Версия 0.0.1\n\n"
-                "\n"
-                "Автор: dima_luts\n"
-                "© 2025 Все права защищены.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: theme.textSecondary),
+                "Версия 0.0.3",
+                style: TextStyle(fontSize: 14, color: theme.textSecondary),
               ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => Navigator.of(ctx).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: theme.sendButton,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 12),
+              Divider(color: theme.textSecondary.withOpacity(0.2)),
+              const SizedBox(height: 12),
+              Text(
+                "Автор: @dima_luts\n© 2025 Все права защищены.",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: theme.textSecondary),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: TextButton.styleFrom(
+                    backgroundColor: theme.sendButton.withOpacity(0.1),
+                    foregroundColor: theme.sendButton,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
+                  child: const Text("Закрыть", style: TextStyle(fontSize: 16)),
                 ),
-                child: const Text("Закрыть", style: TextStyle(fontSize: 16)),
               ),
             ],
           ),
@@ -87,6 +95,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         title: const Text("Настройки"),
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
+        centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

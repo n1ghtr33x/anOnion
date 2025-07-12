@@ -179,6 +179,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         title: const Text('Чаты'),
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
+        centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: theme.sendButton),

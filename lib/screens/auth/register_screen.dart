@@ -86,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Icon(
                 Icons.person_add_alt,
                 size: 80,
-                color: theme.sendButton,
+                color: theme.intro_accentText,
               ),
               const SizedBox(height: 24),
               Text(
@@ -94,7 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: theme.textPrimary,
+                  color: theme.intro_primaryText,
                 ),
               ),
               const SizedBox(height: 24),

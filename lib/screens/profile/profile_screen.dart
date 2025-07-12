@@ -73,6 +73,7 @@ Widget build(BuildContext context) {
       title: const Text("Профиль"),
       backgroundColor: theme.inputBackground,
       foregroundColor: theme.textPrimary,
+      centerTitle: true,
     ),
     body: Center(
       child: SingleChildScrollView(

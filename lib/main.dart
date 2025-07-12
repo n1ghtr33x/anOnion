@@ -8,7 +8,6 @@ import '/../themes/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   final prefs = await SharedPreferences.getInstance();
   final savedTheme = prefs.getString('theme') ?? 'Тёмная';
 

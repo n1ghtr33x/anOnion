@@ -207,6 +207,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         title: Text(widget.chat_name),
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
+        centerTitle: true,
       ),
       body: Stack(
         children: [
@@ -235,6 +236,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           isMine: m.userId == currentUserId,
                           senderName: m.sender.name,
                           edited: m.edited,
+                          createdAt: m.createdAt,
                           onLongPressWithPosition: m.userId == currentUserId
                               ? (pos) => _showPopupMenu(m, pos)
                               : null,

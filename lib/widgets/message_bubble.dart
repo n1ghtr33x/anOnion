@@ -8,6 +8,7 @@ class MessageBubble extends StatefulWidget {
   final String senderName;
   final bool edited;
   final void Function(Offset)? onLongPressWithPosition;
+  final DateTime createdAt;
 
   const MessageBubble({
     super.key,
@@ -16,6 +17,7 @@ class MessageBubble extends StatefulWidget {
     required this.senderName,
     this.edited = false,
     this.onLongPressWithPosition,
+    required this.createdAt,
   });
 
   @override
@@ -51,8 +53,9 @@ class _MessageBubbleState extends State<MessageBubble>
             left: widget.isMine ? 50 : 8,
             right: widget.isMine ? 8 : 50,
           ),
-          alignment:
-              widget.isMine ? Alignment.centerRight : Alignment.centerLeft,
+          alignment: widget.isMine
+              ? Alignment.centerRight
+              : Alignment.centerLeft,
           child: Column(
             crossAxisAlignment: widget.isMine
                 ? CrossAxisAlignment.end
@@ -65,13 +68,15 @@ class _MessageBubbleState extends State<MessageBubble>
                     widget.senderName,
                     style: TextStyle(
                       fontSize: 12,
-                      color: customTheme.textSecondary,
+                      color: customTheme.textPrimary,
                     ),
                   ),
                 ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: widget.isMine
                       ? customTheme.bubbleMine
@@ -90,37 +95,56 @@ class _MessageBubbleState extends State<MessageBubble>
                     ),
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.content,
-                      style: TextStyle(
-                        color: customTheme.textPrimary,
-                        fontSize: 16,
-                      ),
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: customTheme.textPrimary,
                     ),
-                    if (widget.edited)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
+                    children: [
+                      TextSpan(text: '${widget.content} '),
+                      const TextSpan(
+                        text: '\u200A',
+                      ), // немного пространства перед временем
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.bottom,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.edit,
-                                size: 12, color: customTheme.textSecondary),
-                            const SizedBox(width: 4),
+                            if (widget.edited) ...[
+                              Icon(
+                                Icons.edit,
+                                size: 9,
+                                color: customTheme.textSecondary.withOpacity(
+                                  0.6,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                "изменено",
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: customTheme.textSecondary.withOpacity(
+                                    0.7,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                            ],
                             Text(
-                              'Изменено',
+                              "${widget.createdAt.hour.toString().padLeft(2, '0')}:${widget.createdAt.minute.toString().padLeft(2, '0')}",
                               style: TextStyle(
-                                fontSize: 11,
-                                fontStyle: FontStyle.italic,
-                                color: customTheme.textSecondary,
+                                fontSize: 10,
+                                color: customTheme.textSecondary.withOpacity(
+                                  0.7,
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
