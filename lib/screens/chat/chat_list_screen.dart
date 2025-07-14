@@ -34,7 +34,13 @@ class _ChatListScreenState extends State<ChatListScreen>
     _focusNode = FocusNode();
 
     _focusNode.addListener(() {
-      setState(() {}); // перерисовка при смене фокуса
+      setState(() {}); // уже есть
+      if (!_focusNode.hasFocus) {
+        _searchController.clear();
+        setState(() {
+          _searchQuery = '';
+        });
+      }
     });
 
     _loadInitialData();
@@ -317,17 +323,6 @@ class _ChatListScreenState extends State<ChatListScreen>
               height: 48,
               child: Stack(
                 children: [
-                  AnimatedAlign(
-                    alignment: _focusNode.hasFocus
-                        ? Alignment.centerLeft
-                        : Alignment.center,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Icon(Icons.search, color: theme.textSecondary),
-                    ),
-                  ),
                   TextField(
                     controller: _searchController,
                     focusNode: _focusNode,
@@ -338,8 +333,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                     },
                     decoration: InputDecoration(
                       filled: true,
-                      fillColor: theme.inputBackground,
-                      hintText: 'Поиск чатов',
+                      fillColor: theme.chat_inputPanel_panelBg,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 40,
                         vertical: 14,
@@ -351,10 +345,32 @@ class _ChatListScreenState extends State<ChatListScreen>
                     ),
                     style: TextStyle(color: theme.textPrimary),
                   ),
+
+                  // Иконка — лежит НАД TextField
+                  Positioned.fill(
+                    child: IgnorePointer(
+                      // не перехватывает клики
+                      child: AnimatedAlign(
+                        alignment: _focusNode.hasFocus
+                            ? Alignment.centerLeft
+                            : Alignment.center,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Icon(
+                            Icons.search,
+                            color: theme.sendButton,
+                          ), // Красная, чтобы ты её точно увидел
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
+
           Expanded(
             child: filteredChats.isEmpty
                 ? Center(
