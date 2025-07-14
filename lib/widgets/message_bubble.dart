@@ -115,18 +115,14 @@ class _MessageBubbleState extends State<MessageBubble>
                               Icon(
                                 Icons.edit,
                                 size: 9,
-                                color: customTheme.textSecondary.withValues(
-                                  alpha: 0.6,
-                                ),
+                                color: customTheme.textSecondary
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 "изменено",
                                 style: TextStyle(
                                   fontSize: 9,
-                                  color: customTheme.textSecondary.withValues(
-                                    alpha: 0.7,
-                                  ),
+                                  color: customTheme.textSecondary
                                 ),
                               ),
                               const SizedBox(width: 6),
@@ -135,9 +131,7 @@ class _MessageBubbleState extends State<MessageBubble>
                               "${widget.createdAt.hour.toString().padLeft(2, '0')}:${widget.createdAt.minute.toString().padLeft(2, '0')}",
                               style: TextStyle(
                                 fontSize: 10,
-                                color: customTheme.textSecondary.withValues(
-                                  alpha: 0.7,
-                                ),
+                                color: customTheme.textSecondary
                               ),
                             ),
                           ],
