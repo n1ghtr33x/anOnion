@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter_messenger/models/message.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -20,23 +21,23 @@ class WebSocketService {
 
     _channel.stream.listen((data) {
       try {
-        print('📥 NEW message: $data');
+        debugPrint('📥 NEW message: $data');
         final jsonData = jsonDecode(data);
         final message = Message.fromJson(jsonData);
         onMessage(message);
       } catch (e, st) {
-        print('❌ Ошибка в _channel.stream: $e\n$st');
+        debugPrint('❌ Ошибка в _channel.stream: $e\n$st');
       }
     });
 
     _edit.stream.listen((data) {
       try {
-        print('✏️ EDIT message: $data');
+        debugPrint('✏️ EDIT message: $data');
         final jsonData = jsonDecode(data);
         final message = Message.fromJson(jsonData);
         onMessage(message);
       } catch (e, st) {
-        print('❌ Ошибка в _edit.stream: $e\n$st');
+        debugPrint('❌ Ошибка в _edit.stream: $e\n$st');
       }
     });
   }

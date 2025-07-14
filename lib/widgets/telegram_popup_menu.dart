@@ -57,9 +57,7 @@ class _TelegramPopupMenuState extends State<TelegramPopupMenu>
       children: [
         GestureDetector(
           onTap: _close,
-          child: Container(
-            color: Colors.black.withOpacity(0.15),
-          ),
+          child: Container(color: Colors.black.withValues(alpha: 0.15)),
         ),
         Positioned(
           left: position.dx - 160,
@@ -93,14 +91,18 @@ class _TelegramPopupMenuState extends State<TelegramPopupMenu>
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
+                              vertical: 12,
+                              horizontal: 16,
+                            ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(item.icon, size: 20),
                                 const SizedBox(width: 8),
-                                Text(item.label,
-                                    style: const TextStyle(fontSize: 16)),
+                                Text(
+                                  item.label,
+                                  style: const TextStyle(fontSize: 16),
+                                ),
                               ],
                             ),
                           ),

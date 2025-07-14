@@ -64,117 +64,113 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-Widget build(BuildContext context) {
-  final theme = context.watch<ThemeProvider>().theme;
+  Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>().theme;
 
-  return Scaffold(
-    backgroundColor: theme.background,
-    appBar: AppBar(
-      title: const Text("Профиль"),
-      backgroundColor: theme.inputBackground,
-      foregroundColor: theme.textPrimary,
-      centerTitle: true,
-    ),
-    body: Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-        child: Column(
-          children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: theme.sendButton,
-              child: Text(
-                username.isNotEmpty ? username[0].toUpperCase() : '?',
-                style: TextStyle(fontSize: 48, color: theme.textPrimary),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Имя (редактируемое)
-            _isEditingName
-                ? Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        width: 200,
-                        child: TextField(
-                          controller: _nameController,
-                          autofocus: true,
-                          style: TextStyle(color: theme.textPrimary),
-                          decoration: InputDecoration(
-                            hintText: 'Введите имя',
-                            hintStyle: TextStyle(color: theme.textSecondary),
-                          ),
-                          onSubmitted: (_) => _saveName(),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.check, color: Colors.green),
-                        onPressed: _saveName,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
-                        onPressed: () {
-                          setState(() {
-                            _isEditingName = false;
-                            _nameController.text = name;
-                          });
-                        },
-                      )
-                    ],
-                  )
-                : GestureDetector(
-                    onTap: () => setState(() => _isEditingName = true),
-                    child: Text(
-                      name.isNotEmpty ? name : 'Нет имени',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: theme.textPrimary,
-                      ),
-                    ),
-                  ),
-
-            const SizedBox(height: 8),
-
-            // Username
-            Text(
-              '@$username',
-              style: TextStyle(
-                fontSize: 16,
-                color: theme.textSecondary,
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Статус
-            if (status.isNotEmpty)
-              Text(
-                status,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  fontSize: 14,
-                  color: theme.textSecondary,
+    return Scaffold(
+      backgroundColor: theme.background,
+      appBar: AppBar(
+        title: const Text("Профиль"),
+        backgroundColor: theme.inputBackground,
+        foregroundColor: theme.textPrimary,
+        centerTitle: true,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 60,
+                backgroundColor: theme.sendButton,
+                child: Text(
+                  username.isNotEmpty ? username[0].toUpperCase() : '?',
+                  style: TextStyle(fontSize: 48, color: theme.intro_buttonText),
                 ),
               ),
+              const SizedBox(height: 24),
 
-            const SizedBox(height: 32),
+              // Имя (редактируемое)
+              _isEditingName
+                  ? Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          width: 200,
+                          child: TextField(
+                            controller: _nameController,
+                            autofocus: true,
+                            style: TextStyle(color: theme.textPrimary),
+                            decoration: InputDecoration(
+                              hintText: 'Введите имя',
+                              hintStyle: TextStyle(color: theme.textSecondary),
+                            ),
+                            onSubmitted: (_) => _saveName(),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.check, color: Colors.green),
+                          onPressed: _saveName,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              _isEditingName = false;
+                              _nameController.text = name;
+                            });
+                          },
+                        ),
+                      ],
+                    )
+                  : GestureDetector(
+                      onTap: () => setState(() => _isEditingName = true),
+                      child: Text(
+                        name.isNotEmpty ? name : 'Нет имени',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.textPrimary,
+                        ),
+                      ),
+                    ),
 
-            // Email
-            Text(
-              email,
-              style: TextStyle(
-                fontSize: 14,
-                color: theme.textSecondary.withOpacity(0.6),
+              const SizedBox(height: 8),
+
+              // Username
+              Text(
+                '@$username',
+                style: TextStyle(fontSize: 16, color: theme.textSecondary),
               ),
-            ),
-          ],
+
+              const SizedBox(height: 24),
+
+              // Статус
+              if (status.isNotEmpty)
+                Text(
+                  status,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                    color: theme.textSecondary,
+                  ),
+                ),
+
+              const SizedBox(height: 32),
+
+              // Email
+              Text(
+                email,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: theme.textSecondary.withValues(alpha: 0.6),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 }

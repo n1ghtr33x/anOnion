@@ -30,9 +30,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.3), // мягкий фон как у Telegram
+      barrierColor: Colors.black.withValues(
+        alpha: 0.3,
+      ), // мягкий фон как у Telegram
       builder: (ctx) => Dialog(
-        backgroundColor: theme.inputBackground.withOpacity(0.95),
+        backgroundColor: theme.inputBackground.withValues(alpha: 0.95),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 0,
         child: Container(
@@ -56,7 +58,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(fontSize: 14, color: theme.textSecondary),
               ),
               const SizedBox(height: 12),
-              Divider(color: theme.textSecondary.withOpacity(0.2)),
+              Divider(color: theme.textSecondary.withValues(alpha: 0.2)),
               const SizedBox(height: 12),
               Text(
                 "Автор: @dima_luts\n© 2025 Все права защищены.",
@@ -69,7 +71,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
                   style: TextButton.styleFrom(
-                    backgroundColor: theme.sendButton.withOpacity(0.1),
+                    backgroundColor: theme.sendButton.withValues(alpha: 0.1),
                     foregroundColor: theme.sendButton,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

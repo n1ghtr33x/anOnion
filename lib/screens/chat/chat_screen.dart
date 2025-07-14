@@ -218,7 +218,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
           // Затемнение (опционально, можно убрать)
           Positioned.fill(
-            child: Container(color: Colors.black.withOpacity(0.03)),
+            child: Container(color: Colors.black.withValues(alpha: 0.03)),
           ),
 
           // Основной контент
