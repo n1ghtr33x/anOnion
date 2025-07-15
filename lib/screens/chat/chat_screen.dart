@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger/scripts/send_photo.dart';
 import 'package:flutter_messenger/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 import '../../models/chat.dart';
@@ -12,6 +13,10 @@ import 'dart:async';
 
 import '../../services/websocket_service.dart';
 import '../../widgets/message_bubble.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
+// <--- вот он
 
 class ChatScreen extends StatefulWidget {
   final Chat chat;
@@ -43,6 +48,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         messages = jsonList.map((m) => Message.fromJson(m)).toList();
         if (messages.isNotEmpty) {}
       });
+      for (var m in messages) {
+        print('Msg id=${m.id} isPhoto=${m.isPhoto} imageUrl=${m.imageUrl}');
+      }
       _scrollToBottom();
     }
   }
@@ -56,6 +64,32 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         curve: Curves.easeOut,
       );
     }
+  }
+
+  Future<void> _sendImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile == null) return;
+
+    final file = File(pickedFile.path);
+
+    await showSendPhotoWithTextDialog(
+      context,
+      photoFile: file,
+      onSend: (text) async {
+        final bytes = await file.readAsBytes();
+        final base64Image = base64Encode(bytes);
+        final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
+
+        // Отправляем один пакет с фото + текстом
+        _webSocketService.sendImageWithText(
+          userId: currentUserId,
+          base64Image: base64Image,
+          mimeType: mimeType,
+          text: text.trim(),
+        );
+      },
+    );
   }
 
   void _loadCurrentUser() async {
@@ -74,8 +108,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     if (content.isEmpty) return;
     _webSocketService.sendMessage(currentUserId, content);
     _controller.clear();
-    _focusNode
-        .requestFocus(); // <-- вот тут возвращаем фокус обратно в TextField
+    _focusNode.requestFocus();
   }
 
   @override
@@ -270,6 +303,8 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           senderName: m.sender.name,
                           edited: m.edited,
                           createdAt: m.createdAt,
+                          isPhoto: m.isPhoto,
+                          imageUrl: m.imageUrl,
                           onLongPressWithPosition: m.userId == currentUserId
                               ? (pos) => _showPopupMenu(m, pos)
                               : null,
@@ -287,6 +322,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                   ),
                   child: Row(
                     children: [
+                      IconButton(
+                        icon: Icon(Icons.photo, color: theme.sendButton),
+                        onPressed: _sendImage,
+                      ),
                       Expanded(
                         child: Container(
                           height: 30,

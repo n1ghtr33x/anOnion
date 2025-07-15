@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../services/websocket_service.dart';
 import '/../models/chat.dart';
 import '/../models/message.dart';
 import '/../screens/chat/chat_screen.dart';
@@ -20,11 +21,12 @@ class _ChatListScreenState extends State<ChatListScreen>
     with TickerProviderStateMixin {
   List<Chat> chats = [];
   List<Message> messages = [];
-  Timer? _timer;
   int? currentUserId;
   late TextEditingController _searchController;
   late FocusNode _focusNode;
   String _searchQuery = '';
+
+  late final WebSocketService _webSocketService;
 
   @override
   void initState() {
@@ -34,7 +36,7 @@ class _ChatListScreenState extends State<ChatListScreen>
     _focusNode = FocusNode();
 
     _focusNode.addListener(() {
-      setState(() {}); // уже есть
+      setState(() {});
       if (!_focusNode.hasFocus) {
         _searchController.clear();
         setState(() {
@@ -44,7 +46,46 @@ class _ChatListScreenState extends State<ChatListScreen>
     });
 
     _loadInitialData();
-    _startChatPolling();
+
+    _webSocketService = WebSocketService();
+
+    _webSocketService.connect(
+      0,
+      (Message msg) {
+        // Здесь можно оставить пустым
+      },
+      onNewChat: (Chat newChat) {
+        setState(() {
+          if (!chats.any((c) => c.id == newChat.id)) {
+            chats.add(newChat);
+            _sortChatsByLastMessage();
+          }
+        });
+      },
+    );
+
+    // 📌 Слушай обновления чатов по WebSocket
+    _webSocketService.listenChatUpdates((Chat updatedChat) {
+      setState(() {
+        final index = chats.indexWhere((c) => c.id == updatedChat.id);
+        if (index != -1) {
+          chats[index] = updatedChat;
+          _loadLatestMessages();
+        } else {
+          chats.add(updatedChat);
+          _loadLatestMessages();
+        }
+        _sortChatsByLastMessage();
+      });
+    });
+  }
+
+  void _sortChatsByLastMessage() {
+    chats.sort((a, b) {
+      final aTime = a.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final bTime = b.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return bTime.compareTo(aTime);
+    });
   }
 
   Future<void> _loadInitialData() async {
@@ -52,27 +93,6 @@ class _ChatListScreenState extends State<ChatListScreen>
     await _loadCurrentUserId();
     await _loadChats();
     await _loadLatestMessages();
-  }
-
-  void _startChatPolling() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
-      await _checkNewChats();
-      await _loadLatestMessages();
-      await _cacheLastMessages();
-    });
-  }
-
-  Future<void> _cacheLastMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final Map<String, dynamic> cacheMap = {
-      for (var chat in chats)
-        chat.id.toString(): {
-          'content': chat.lastMessage,
-          'createdAt': chat.lastMessageTime?.toIso8601String(),
-          'name': chat.name,
-        },
-    };
-    await prefs.setString('last_messages', jsonEncode(cacheMap));
   }
 
   Future<void> _loadCachedLastMessages() async {
@@ -105,29 +125,6 @@ class _ChatListScreenState extends State<ChatListScreen>
       });
     } else {
       debugPrint('Ошибка получения профиля: ${response.statusCode}');
-    }
-  }
-
-  Future<void> _checkNewChats() async {
-    final response = await ApiService.getChats();
-    if (response.statusCode == 200) {
-      final List data = jsonDecode(response.body);
-      final List<Chat> fetchedChats = data
-          .map((json) => Chat.fromJson(json))
-          .toList();
-
-      final newChats = fetchedChats
-          .where(
-            (fetchedChat) =>
-                !chats.any((existingChat) => existingChat.id == fetchedChat.id),
-          )
-          .toList();
-
-      if (newChats.isNotEmpty) {
-        setState(() {
-          chats.addAll(newChats);
-        });
-      }
     }
   }
 
@@ -280,7 +277,7 @@ class _ChatListScreenState extends State<ChatListScreen>
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _webSocketService.disconnect();
     _searchController.dispose();
     _focusNode.dispose();
     super.dispose();

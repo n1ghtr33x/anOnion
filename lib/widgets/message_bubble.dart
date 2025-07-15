@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +9,9 @@ class MessageBubble extends StatefulWidget {
   final bool isMine;
   final String senderName;
   final bool edited;
+  final bool isPhoto;
   final void Function(Offset)? onLongPressWithPosition;
+  final String? imageUrl;
   final DateTime createdAt;
 
   const MessageBubble({
@@ -15,7 +19,9 @@ class MessageBubble extends StatefulWidget {
     required this.content,
     required this.isMine,
     required this.senderName,
+    this.imageUrl,
     this.edited = false,
+    this.isPhoto = false,
     this.onLongPressWithPosition,
     required this.createdAt,
   });
@@ -32,11 +38,12 @@ class _MessageBubbleState extends State<MessageBubble>
   Widget build(BuildContext context) {
     final customTheme = context.watch<ThemeProvider>().theme;
 
+    final timeText =
+        "${widget.createdAt.hour.toString().padLeft(2, '0')}:${widget.createdAt.minute.toString().padLeft(2, '0')}";
+
     return GestureDetector(
       onLongPressStart: (details) {
-        setState(() {
-          _isPressed = true;
-        });
+        setState(() => _isPressed = true);
         widget.onLongPressWithPosition?.call(details.globalPosition);
       },
       onLongPressEnd: (_) => setState(() => _isPressed = false),
@@ -73,10 +80,9 @@ class _MessageBubbleState extends State<MessageBubble>
                   ),
                 ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 10,
-                ),
+                padding: widget.isPhoto
+                    ? const EdgeInsets.all(4)
+                    : const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 decoration: BoxDecoration(
                   color: widget.isMine
                       ? customTheme.bubbleMine
@@ -95,55 +101,180 @@ class _MessageBubbleState extends State<MessageBubble>
                     ),
                   ],
                 ),
-                child: RichText(
-                  text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: customTheme.textPrimary,
-                    ),
-                    children: [
-                      TextSpan(text: '${widget.content} '),
-                      const TextSpan(
-                        text: '\u200A',
-                      ), // немного пространства перед временем
-                      WidgetSpan(
-                        alignment: PlaceholderAlignment.bottom,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.edited) ...[
-                              Icon(
-                                Icons.edit,
-                                size: 9,
-                                color: customTheme.textSecondary
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "изменено",
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  color: customTheme.textSecondary
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                            ],
-                            Text(
-                              "${widget.createdAt.hour.toString().padLeft(2, '0')}:${widget.createdAt.minute.toString().padLeft(2, '0')}",
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: customTheme.textSecondary
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                child: widget.isPhoto && widget.imageUrl != null
+                    ? _buildPhotoWithTextMessage(
+                        widget.imageUrl!,
+                        widget.content,
+                        timeText,
+                        customTheme,
+                      )
+                    : _buildTextMessage(widget.content, timeText, customTheme),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoWithTextMessage(
+    String imageUrl,
+    String text,
+    String timeText,
+    dynamic theme,
+  ) {
+    final String baseUrl = 'http://109.173.168.29:8001';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            baseUrl + imageUrl,
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return SizedBox(
+                width: 200,
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 200,
+              height: 200,
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image, size: 50),
+            ),
+          ),
+        ),
+        if (text.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Text(text, style: TextStyle(fontSize: 16, color: theme.textPrimary)),
+        ],
+        const SizedBox(height: 4),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.edited) ...[
+              Icon(Icons.edit, size: 9, color: theme.textSecondary),
+              const SizedBox(width: 4),
+              Text(
+                "изменено",
+                style: TextStyle(fontSize: 9, color: theme.textSecondary),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              timeText,
+              style: TextStyle(fontSize: 10, color: theme.textSecondary),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhotoMessage(String path, String timeText, dynamic theme) {
+    final String baseUrl = 'http://109.173.168.29:8001';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            baseUrl +
+                widget
+                    .content, // <--- Здесь лучше использовать path вместо widget.content
+            width: 200,
+            height: 200,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return SizedBox(
+                width: 200,
+                height: 200,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    value: loadingProgress.expectedTotalBytes != null
+                        ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                        : null,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 200,
+              height: 200,
+              color: Colors.grey[300],
+              child: const Icon(Icons.broken_image, size: 50),
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (widget.edited) ...[
+              Icon(Icons.edit, size: 9, color: theme.textSecondary),
+              const SizedBox(width: 4),
+              Text(
+                "изменено",
+                style: TextStyle(fontSize: 9, color: theme.textSecondary),
+              ),
+              const SizedBox(width: 6),
+            ],
+            Text(
+              timeText,
+              style: TextStyle(fontSize: 10, color: theme.textSecondary),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextMessage(String text, String timeText, dynamic theme) {
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(fontSize: 16, color: theme.textPrimary),
+        children: [
+          TextSpan(text: '$text '),
+          const TextSpan(text: '\u200A'),
+          WidgetSpan(
+            alignment: PlaceholderAlignment.bottom,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (widget.edited) ...[
+                  Icon(Icons.edit, size: 9, color: theme.textSecondary),
+                  const SizedBox(width: 4),
+                  Text(
+                    "изменено",
+                    style: TextStyle(fontSize: 9, color: theme.textSecondary),
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  timeText,
+                  style: TextStyle(fontSize: 10, color: theme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
