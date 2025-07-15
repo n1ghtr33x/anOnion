@@ -1,11 +1,17 @@
 class User {
   final int id;
   final String? name;
+  final String? photoUrl;
 
-  User({required this.id, this.name});
+  User({required this.id, this.name, this.photoUrl});
 
-  factory User.fromJson(Map<String, dynamic> json) =>
-      User(id: json['id'], name: json['name']);
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json['id'],
+    name: json['name'],
+    photoUrl: json['photo_url'] != null
+        ? 'http://109.173.168.29:8001${json['photo_url']}'
+        : null,
+  );
 }
 
 class Chat {

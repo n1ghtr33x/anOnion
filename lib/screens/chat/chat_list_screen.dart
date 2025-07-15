@@ -405,20 +405,30 @@ class _ChatListScreenState extends State<ChatListScreen>
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        leading: CircleAvatar(
-                          radius: 24,
-                          backgroundColor: theme.sendButton,
-                          child: Text(
-                            displayName.isNotEmpty
-                                ? displayName.toUpperCase()[0]
-                                : '?',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
+                        leading:
+                            otherUser.photoUrl != null &&
+                                otherUser.photoUrl!.isNotEmpty
+                            ? CircleAvatar(
+                                radius: 24,
+                                backgroundImage: NetworkImage(
+                                  otherUser.photoUrl!,
+                                ),
+                                backgroundColor: Colors.transparent,
+                              )
+                            : CircleAvatar(
+                                radius: 24,
+                                backgroundColor: theme.sendButton,
+                                child: Text(
+                                  displayName.isNotEmpty
+                                      ? displayName.toUpperCase()[0]
+                                      : '?',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                  ),
+                                ),
+                              ),
                         title: Text(
                           displayName,
                           style: TextStyle(

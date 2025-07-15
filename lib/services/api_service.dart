@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger/main.dart';
 import 'package:flutter_messenger/screens/auth/login_screen.dart';
@@ -49,6 +50,21 @@ class ApiService {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode(body),
     );
+  }
+
+  static Future<http.Response> uploadAvatar(File file) async {
+    final token = await getAccessToken();
+    if (token == null) {
+      throw Exception('Unauthorized');
+    }
+
+    var uri = Uri.parse('$baseUrl/upload-avatar');
+    var request = http.MultipartRequest('POST', uri);
+    request.headers['Authorization'] = 'Bearer $token';
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+
+    var streamedResponse = await request.send();
+    return await http.Response.fromStream(streamedResponse);
   }
 
   static Future<http.Response> getChats() async {

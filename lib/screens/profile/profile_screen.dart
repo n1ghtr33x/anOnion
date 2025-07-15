@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_messenger/services/api_service.dart';
 import 'package:flutter_messenger/themes/theme_provider.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,6 +18,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String email = '';
   String name = '';
   String status = '';
+  File? _avatarFile;
+  String? _avatarUrl;
+  final ImagePicker _picker = ImagePicker();
 
   final _nameController = TextEditingController();
   bool _isEditingName = false;
@@ -37,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           email = data['email'] ?? '';
           name = data['name'] ?? '';
           status = data['status'] ?? '';
+          _avatarUrl = data['photo_url'];
           _nameController.text = name;
         });
       }
@@ -63,6 +69,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _pickAndUploadAvatar() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+      );
+      if (pickedFile == null) return; // отмена
+
+      setState(() {
+        _avatarFile = File(pickedFile.path);
+      });
+
+      final res = await ApiService.uploadAvatar(_avatarFile!);
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        setState(() {
+          _avatarUrl =
+              data['url']; // ссылка на сервере, например "/avatars/uuid.jpg"
+        });
+        // Можно сразу обновить профиль в ApiService, если есть метод
+      } else {
+        // Ошибка загрузки
+        debugPrint("Ошибка загрузки аватара: ${res.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Ошибка выбора/загрузки аватара: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().theme;
@@ -80,12 +114,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           child: Column(
             children: [
-              CircleAvatar(
-                radius: 60,
-                backgroundColor: theme.sendButton,
-                child: Text(
-                  username.isNotEmpty ? username[0].toUpperCase() : '?',
-                  style: TextStyle(fontSize: 48, color: theme.intro_buttonText),
+              GestureDetector(
+                onTap: _pickAndUploadAvatar,
+                child: CircleAvatar(
+                  radius: 60,
+                  backgroundColor: theme.sendButton,
+                  backgroundImage: _avatarFile != null
+                      ? FileImage(_avatarFile!)
+                      : (_avatarUrl != null
+                            ? NetworkImage(
+                                    'http://109.173.168.29:8001$_avatarUrl',
+                                  )
+                                  as ImageProvider
+                            : null),
+                  child: (_avatarFile == null && _avatarUrl == null)
+                      ? Text(
+                          username.isNotEmpty ? username[0].toUpperCase() : '?',
+                          style: TextStyle(
+                            fontSize: 48,
+                            color: theme.intro_buttonText,
+                          ),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 24),

@@ -30,6 +30,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   final FocusNode _focusNode = FocusNode();
   OverlayEntry? _overlayEntry;
   late final WebSocketService _webSocketService;
+  late final User otherUser;
 
   Timer? _timer;
 
@@ -81,6 +82,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _loadCurrentUser();
+    otherUser = widget.chat.users.firstWhere(
+      (user) => user.id != currentUserId,
+      orElse: () => widget.chat.users.first,
+    );
     _loadMessages().then((_) {
       _webSocketService = WebSocketService();
       _webSocketService.connect(widget.chat.id, (msg) {
@@ -204,10 +209,38 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: theme.background,
       appBar: AppBar(
-        title: Text(widget.chat_name),
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
         centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundImage: otherUser.photoUrl != null
+                  ? NetworkImage(otherUser.photoUrl!)
+                  : null,
+              backgroundColor: theme.sendButton,
+              child: otherUser.photoUrl == null
+                  ? Text(
+                      (otherUser.name ?? '?').isNotEmpty
+                          ? otherUser.name![0].toUpperCase()
+                          : '?',
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              widget.chat_name,
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                color: theme.textPrimary,
+              ),
+            ),
+          ],
+        ),
       ),
       body: Stack(
         children: [
