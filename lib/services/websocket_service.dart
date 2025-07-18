@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger/models/message.dart';
-import 'package:flutter_messenger/models/chat.dart'; // обязательно импортировать модель Chat
+import '/../models/message.dart';
+import '/../models/chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'api_service.dart';

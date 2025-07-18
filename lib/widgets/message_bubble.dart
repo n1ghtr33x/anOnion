@@ -1,8 +1,8 @@
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger/themes/theme_provider.dart';
+import '/../themes/theme_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'full_screen_image_viewer.dart';
 
 class MessageBubble extends StatefulWidget {
   final String content;
@@ -130,99 +130,50 @@ class _MessageBubbleState extends State<MessageBubble>
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            baseUrl + imageUrl,
-            width: 200,
-            height: 200,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return SizedBox(
-                width: 200,
-                height: 200,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) =>
+                      FullScreenImageViewer(imageUrl: baseUrl + imageUrl),
                 ),
               );
             },
-            errorBuilder: (context, error, stackTrace) => Container(
+            child: Image.network(
+              baseUrl + imageUrl,
               width: 200,
               height: 200,
-              color: Colors.grey[300],
-              child: const Icon(Icons.broken_image, size: 50),
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return SizedBox(
+                  width: 200,
+                  height: 200,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => Container(
+                width: 200,
+                height: 200,
+                color: Colors.grey[300],
+                child: const Icon(Icons.broken_image, size: 50),
+              ),
             ),
           ),
         ),
+
         if (text.isNotEmpty) ...[
           const SizedBox(height: 8),
           Text(text, style: TextStyle(fontSize: 16, color: theme.textPrimary)),
         ],
-        const SizedBox(height: 4),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.edited) ...[
-              Icon(Icons.edit, size: 9, color: theme.textSecondary),
-              const SizedBox(width: 4),
-              Text(
-                "изменено",
-                style: TextStyle(fontSize: 9, color: theme.textSecondary),
-              ),
-              const SizedBox(width: 6),
-            ],
-            Text(
-              timeText,
-              style: TextStyle(fontSize: 10, color: theme.textSecondary),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhotoMessage(String path, String timeText, dynamic theme) {
-    final String baseUrl = 'http://109.173.168.29:8001';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            baseUrl +
-                widget
-                    .content, // <--- Здесь лучше использовать path вместо widget.content
-            width: 200,
-            height: 200,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, loadingProgress) {
-              if (loadingProgress == null) return child;
-              return SizedBox(
-                width: 200,
-                height: 200,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    value: loadingProgress.expectedTotalBytes != null
-                        ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                        : null,
-                  ),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) => Container(
-              width: 200,
-              height: 200,
-              color: Colors.grey[300],
-              child: const Icon(Icons.broken_image, size: 50),
-            ),
-          ),
-        ),
         const SizedBox(height: 4),
         Row(
           mainAxisSize: MainAxisSize.min,

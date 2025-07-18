@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger/screens/main_screen.dart';
-import 'package:flutter_messenger/services/api_service.dart';
+import '../../l10n/app_localizations.dart';
+import '/../screens/main_screen.dart';
+import '/../services/api_service.dart';
 import 'package:provider/provider.dart';
 
 import '../../themes/theme_provider.dart';
@@ -42,19 +43,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (!mounted) return;
         _login();
       } else {
-        setState(() => _error = "Регистрация прошла, но вход не удался");
+        setState(
+          () => _error = AppLocalizations.of(
+            context,
+          )!.authRegistrationLoginFailed,
+        );
       }
     } else {
-      setState(() => _error = "Ошибка регистрации");
+      setState(
+        () => _error = AppLocalizations.of(context)!.authRegistrationError,
+      );
     }
   }
 
   void _login() async {
     try {
-      final res = await ApiService.login(
-        _username.text,
-        _password.text,
-      );
+      final res = await ApiService.login(_username.text, _password.text);
       if (!mounted) return;
       if (res.statusCode == 200) {
         Navigator.pushReplacement(
@@ -62,11 +66,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       } else {
-        setState(() => _error = "Неверный логин или пароль");
+        setState(() => _error = AppLocalizations.of(context)!.authLoginInvalid);
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = "Ошибка подключения: $e");
+      setState(
+        () => _error =
+            "${AppLocalizations.of(context)!.authRegistrationConnectionError}: $e",
+      );
     }
   }
 
@@ -90,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                "Создание аккаунта",
+                AppLocalizations.of(context)!.authRegistrationAccountCreation,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -104,18 +111,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Text(
                     _error!,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: theme.errorAccent,
-                    ),
+                    style: TextStyle(color: theme.errorAccent),
                   ),
                 ),
               _buildTextField(_email, "Email"),
               const SizedBox(height: 12),
-              _buildTextField(_username, "Логин"),
+              _buildTextField(
+                _username,
+                AppLocalizations.of(context)!.authLogin,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(_name, "Имя"),
+              _buildTextField(
+                _name,
+                AppLocalizations.of(context)!.authRegistrationName,
+              ),
               const SizedBox(height: 12),
-              _buildTextField(_password, "Пароль", obscure: true),
+              _buildTextField(
+                _password,
+                AppLocalizations.of(context)!.authRegistrationPassword,
+                obscure: true,
+              ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _register,
@@ -127,14 +142,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 child: Text(
-                  "Зарегистрироваться",
+                  AppLocalizations.of(context)!.authRegistrationRegister,
                   style: TextStyle(color: theme.intro_buttonText),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  "Уже есть аккаунт? Войти",
+                  AppLocalizations.of(
+                    context,
+                  )!.authRegistrationAlreadyHaveAnAccount,
                   style: TextStyle(color: theme.intro_primaryText),
                 ),
               ),
@@ -160,7 +177,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         filled: true,
         fillColor: theme.bubbleOther,
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        labelStyle: TextStyle(color: theme.textSecondary)
+        labelStyle: TextStyle(color: theme.textSecondary),
       ),
     );
   }

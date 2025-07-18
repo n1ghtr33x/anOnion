@@ -17,6 +17,7 @@ class CustomTheme {
   final Color intro_accentText;
   final Color intro_buttonText;
   final String chatBackgroundPath;
+  final Color settingsListItemBackground;
 
   CustomTheme({
     required this.name,
@@ -35,13 +36,19 @@ class CustomTheme {
     required this.intro_primaryText,
     required this.intro_accentText,
     required this.intro_buttonText,
+    required this.settingsListItemBackground,
   });
 
   static CustomTheme dark() => CustomTheme(
     name: 'Тёмная',
     background: const Color(0xFF18222D), // chatList_bg
     textPrimary: const Color(0xFFFFFFFF), // list_primaryText
-    textSecondary: const Color.fromARGB(255, 175, 175, 175), // list_secondaryText
+    textSecondary: const Color.fromARGB(
+      255,
+      175,
+      175,
+      175,
+    ), // list_secondaryText
     inputBackground: const Color(0xFF131C26), // chat_inputPanel_inputBg
     bubbleMine: const Color(0xFF5D7F93), // пример из outgoing bubble
     bubbleOther: const Color(0xFF21303F), // incoming bubble bg
@@ -54,17 +61,31 @@ class CustomTheme {
     intro_primaryText: const Color(0xFFFFFFFF),
     intro_buttonText: const Color(0xFFFFFFFF),
     intro_accentText: const Color(0xFF2EA5FF),
+    settingsListItemBackground: const Color.fromARGB(
+      255,
+      25,
+      36,
+      49,
+    ), // Темный фон для группы
   );
 
   static CustomTheme light() => CustomTheme(
     name: 'Светлая',
-    background: const Color(0xFFFFFFFF), // chatList_bg
+    background: const Color.fromARGB(255, 241, 241, 241), // chatList_bg
     textPrimary: const Color(0xFF000000), // chat_message_incoming_primaryText
-    textSecondary: const Color(0x8A525252), // chat_message_incoming_secondaryText
+    textSecondary: const Color(
+      0x8A525252,
+    ), // chat_message_incoming_secondaryText
     inputBackground: const Color(0xFFFFFFFF), // chat_inputPanel_inputBg
-    bubbleMine: const Color(0xFFE1FFC7), // chat_message_outgoing_bubble_withWp_bg
-    bubbleOther: const Color(0xFFFFFFFF), // chat_message_incoming_bubble_withWp_bg
-    bubleMineOther: const Color(0xFFD9F4FF), // chat_message_incoming_bubble_withWp_highlightedBg
+    bubbleMine: const Color(
+      0xFFE1FFC7,
+    ), // chat_message_outgoing_bubble_withWp_bg
+    bubbleOther: const Color(
+      0xFFFFFFFF,
+    ), // chat_message_incoming_bubble_withWp_bg
+    bubleMineOther: const Color(
+      0xFFD9F4FF,
+    ), // chat_message_incoming_bubble_withWp_highlightedBg
     sendButton: const Color(0xFF007AFF), // chat_inputPanel_actionControlBg
     chat_inputPanel_panelBg: const Color(0xF2F2F2E5),
     errorAccent: Colors.redAccent,
@@ -73,5 +94,6 @@ class CustomTheme {
     intro_primaryText: const Color(0xFF000000),
     intro_buttonText: const Color(0xFFFFFFFF),
     intro_accentText: const Color(0xFF2EA5FF),
+    settingsListItemBackground: Colors.white, // Светлый фон для группы
   );
 }

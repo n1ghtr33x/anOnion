@@ -34,7 +34,7 @@ class Chat {
   factory Chat.fromJson(Map<String, dynamic> json) => Chat(
     id: json['id'],
     name: json['name'],
-    lastMessage: json['last_message'] ?? '',
+    lastMessage: json['last_message'],
     users: (json['users'] as List<dynamic>)
         .map((u) => User.fromJson(u))
         .toList(),

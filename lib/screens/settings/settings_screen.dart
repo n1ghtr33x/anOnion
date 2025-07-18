@@ -1,9 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger/screens/settings/theme_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/setting_item.dart';
+import '../../services/api_service.dart';
+import '../../widgets/settings_list_item.dart';
 import '/../screens/auth/login_screen.dart';
-import '/../themes/CutomTheme.dart';
 import '/../themes/theme_provider.dart';
+import '../../l10n/app_localizations.dart';
+import 'language_screen.dart'; // импорт локализации
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -13,6 +20,45 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  String username = '';
+  String name = '';
+  String? _avatarUrl;
+  bool _expanded = false;
+
+  void _toggleExpand() {
+    setState(() {
+      _expanded = !_expanded;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await ApiService.getProfile();
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (!mounted) return;
+        setState(() {
+          username = data['username'] ?? '';
+          name = data['name'] ?? '';
+          _avatarUrl = data['photo_url'];
+        });
+      }
+    } catch (e) {
+      // Игнорируем ошибки загрузки
+    }
+  }
+
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
@@ -25,16 +71,194 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>().theme;
+    final loc = AppLocalizations.of(context)!;
+
+    final double collapsedSize = 120;
+    final double expandedSize = MediaQuery.of(context).size.height * 0.5;
+
+    final List<SettingItem> group1 = [
+      SettingItem(
+        icon: Icons.palette,
+        iconColor: theme.sendButton, // Цвет иконки как на фото
+        title: loc.appearanceTitle,
+        titleStyle: theme.textPrimary,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ThemeScreen()),
+          );
+        },
+      ),
+      SettingItem(
+        icon: Icons.language,
+        iconColor: Colors.purpleAccent,
+        title: loc.languageTitle,
+        titleStyle: theme.textPrimary,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const LanguageScreen()),
+          );
+        },
+      ),
+      SettingItem(
+        icon: Icons.info_outline,
+        iconColor: theme.sendButton, // Цвет иконки как на фото
+        title: loc.settingsAboutApp,
+        titleStyle: theme.textPrimary,
+        onTap: () => _showCustomAboutDialog(context),
+      ),
+      SettingItem(
+        icon: Icons.logout,
+        iconColor: theme.errorAccent, // Цвет иконки как на фото
+        title: loc.settingsLogout,
+        titleStyle: theme.textPrimary,
+        onTap: () => _logout(),
+      ),
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(loc.settingsTitle),
+        backgroundColor: theme.inputBackground,
+        foregroundColor: theme.textPrimary,
+        centerTitle: true,
+      ),
+      backgroundColor: theme.background,
+      body: Column(
+        children: [
+          GestureDetector(
+            onTap: _toggleExpand,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 400),
+              curve: Curves.easeInOut,
+              width: _expanded ? expandedSize : collapsedSize,
+              height: _expanded ? expandedSize : collapsedSize,
+              margin: EdgeInsets.only(top: 20, bottom: _expanded ? 20 : 10),
+              decoration: BoxDecoration(
+                color: theme.sendButton,
+                shape: BoxShape
+                    .rectangle, // обязательно rectangle, чтобы работал borderRadius
+                borderRadius: BorderRadius.circular(
+                  _expanded ? 20 : collapsedSize / 2,
+                ),
+                image: _avatarUrl != null
+                    ? DecorationImage(
+                        image: NetworkImage(
+                          'http://109.173.168.29:8001$_avatarUrl',
+                        ),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: Stack(
+                children: [
+                  if (_avatarUrl == null)
+                    Center(
+                      child: Text(
+                        username.isNotEmpty ? username[0].toUpperCase() : '?',
+                        style: TextStyle(
+                          fontSize: _expanded ? 64 : 32,
+                          color: theme.intro_buttonText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                    bottom: _expanded ? 20 : 10,
+                    left: _expanded ? 20 : 0,
+                    right: _expanded ? null : 0,
+                    child: AnimatedAlign(
+                      duration: const Duration(milliseconds: 400),
+                      alignment: _expanded
+                          ? Alignment.bottomLeft
+                          : Alignment.center,
+                      child: Text(
+                        name.isNotEmpty ? name : username,
+                        style: TextStyle(
+                          fontSize: _expanded ? 28 : 22,
+                          color: Colors.white,
+                          shadows: const [
+                            Shadow(
+                              blurRadius: 4,
+                              color: Colors.black54,
+                              offset: Offset(1, 1),
+                            ),
+                          ],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              children: [
+                const SizedBox(height: 24),
+                _buildSettingsGroup(context, group1, theme),
+                const SizedBox(height: 12),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsGroup(
+    BuildContext context,
+    List<SettingItem> items,
+    theme,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16.0), // Отступы по бокам
+      decoration: BoxDecoration(
+        color: theme.settingsListItemBackground, // Темный фон для группы
+        borderRadius: BorderRadius.circular(
+          10,
+        ), // Скругленные углы для всей группы
+      ),
+      child: Column(
+        children: items.map((item) {
+          // Для каждого элемента создаем SettingsListItem
+          // И добавляем Divider между элементами, кроме последнего
+          return Column(
+            children: [
+              SettingsListItem(item: item),
+              if (item !=
+                  items
+                      .last) // Если это не последний элемент в группе, добавляем разделитель
+                Divider(
+                  height: 1,
+                  color: theme.textPrimary.withOpacity(0.2),
+                  indent: 60, // Отступ слева (ширина иконки + пробел)
+                  endIndent: 0,
+                ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   void _showCustomAboutDialog(BuildContext context) {
     final theme = Provider.of<ThemeProvider>(context, listen: false).theme;
+    final loc = AppLocalizations.of(context)!;
 
     showDialog(
       context: context,
-      barrierColor: Colors.black.withValues(
-        alpha: 0.3,
-      ), // мягкий фон как у Telegram
+      barrierColor: Colors.black.withOpacity(0.3),
       builder: (ctx) => Dialog(
-        backgroundColor: theme.inputBackground.withValues(alpha: 0.95),
+        backgroundColor: theme.inputBackground.withOpacity(0.95),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         elevation: 0,
         child: Container(
@@ -54,14 +278,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                "Версия 0.0.3",
+                loc.settingsAppVersion, // "Версия 0.0.3"
                 style: TextStyle(fontSize: 14, color: theme.textSecondary),
               ),
               const SizedBox(height: 12),
-              Divider(color: theme.textSecondary.withValues(alpha: 0.2)),
+              Divider(color: theme.textSecondary.withOpacity(0.2)),
               const SizedBox(height: 12),
               Text(
-                "Автор: @dima_luts\n© 2025 Все права защищены.",
+                loc.settingsAppAuthor, // "Автор: @dima_luts\n© 2025 Все права защищены."
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: theme.textSecondary),
               ),
@@ -71,119 +295,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: TextButton(
                   onPressed: () => Navigator.of(ctx).pop(),
                   style: TextButton.styleFrom(
-                    backgroundColor: theme.sendButton.withValues(alpha: 0.1),
+                    backgroundColor: theme.sendButton.withOpacity(0.1),
                     foregroundColor: theme.sendButton,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  child: const Text("Закрыть", style: TextStyle(fontSize: 16)),
+                  child: Text(
+                    loc.settingsClose,
+                    style: const TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = context.watch<ThemeProvider>().theme;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Настройки"),
-        backgroundColor: theme.inputBackground,
-        foregroundColor: theme.textPrimary,
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            _buildCard(
-              theme,
-              child: ListTile(
-                leading: Icon(Icons.palette, color: theme.sendButton),
-                title: Text(
-                  "Выбор темы",
-                  style: TextStyle(color: theme.textPrimary),
-                ),
-                subtitle: Text(
-                  "Текущая: ${theme.name}",
-                  style: TextStyle(color: theme.textSecondary),
-                ),
-                onTap: () => _showThemeDialog(context),
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildCard(
-              theme,
-              child: ListTile(
-                leading: Icon(Icons.logout, color: theme.sendButton),
-                title: Text(
-                  "Выйти из аккаунта",
-                  style: TextStyle(color: theme.textPrimary),
-                ),
-                onTap: _logout,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _buildCard(
-              theme,
-              child: ListTile(
-                leading: Icon(Icons.info_outline, color: theme.sendButton),
-                title: Text(
-                  "О приложении",
-                  style: TextStyle(color: theme.textPrimary),
-                ),
-                onTap: () => _showCustomAboutDialog(context),
-              ),
-            ),
-          ],
-        ),
-      ),
-      backgroundColor: theme.background,
-    );
-  }
-
-  Widget _buildCard(CustomTheme theme, {required Widget child}) {
-    return Card(
-      color: theme.inputBackground,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: child,
-    );
-  }
-
-  void _showThemeDialog(BuildContext context) {
-    final provider = context.read<ThemeProvider>();
-    final theme = provider.theme;
-    final allThemes = provider.allThemes;
-
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(
-          'Выберите тему',
-          style: TextStyle(color: theme.textPrimary),
-        ),
-        backgroundColor: theme.background,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: allThemes.map((t) {
-            return RadioListTile(
-              title: Text(t.name, style: TextStyle(color: theme.textPrimary)),
-              value: t.name,
-              groupValue: theme.name,
-              onChanged: (_) {
-                provider.setTheme(t);
-                Navigator.pop(context);
-              },
-            );
-          }).toList(),
         ),
       ),
     );

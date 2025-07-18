@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../themes/theme_provider.dart';
 
 class TelegramPopupMenu extends StatefulWidget {
   final Offset position;
@@ -52,6 +55,7 @@ class _TelegramPopupMenuState extends State<TelegramPopupMenu>
   @override
   Widget build(BuildContext context) {
     final position = widget.position;
+    final theme = context.watch<ThemeProvider>().theme;
 
     return Stack(
       children: [
@@ -79,7 +83,8 @@ class _TelegramPopupMenuState extends State<TelegramPopupMenu>
                   ),
                   Container(
                     decoration: BoxDecoration(
-                      color: Color.fromARGB(255, 23, 33, 43),
+                      color: theme.bubbleMine,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

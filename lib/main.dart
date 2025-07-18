@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_messenger/scripts/locale_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '/../screens/auth/login_screen.dart';
 import '/../screens/main_screen.dart';
 import '/../themes/CutomTheme.dart';
 import '/../themes/theme_provider.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final savedTheme = prefs.getString('theme') ?? 'Тёмная';
-
-  // Пример твоего списка тем
-  final customThemes = [
-    CustomTheme.dark(),
-    CustomTheme.light(),
-  ];
+  final customThemes = [CustomTheme.dark(), CustomTheme.light()];
 
   final initialTheme = customThemes.firstWhere(
     (theme) => theme.name == savedTheme,
@@ -23,8 +21,13 @@ void main() async {
   );
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(initialTheme, customThemes),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(initialTheme, customThemes),
+        ),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -38,22 +41,26 @@ class MyApp extends StatelessWidget {
   Future<Widget> _getInitialScreen() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
-    if (token != null && token.isNotEmpty) {
-      return const MainScreen();
-    } else {
-      return const LoginScreen();
-    }
+    return (token != null && token.isNotEmpty)
+        ? const MainScreen()
+        : const LoginScreen();
   }
 
   @override
   Widget build(BuildContext context) {
     final customTheme = context.watch<ThemeProvider>().theme;
+    final locale = context.watch<LocaleProvider>().locale;
 
     return MaterialApp(
       navigatorKey: navigatorKey,
-      title: 'Messenger',
+      title: 'AnOnion',
       debugShowCheckedModeBanner: false,
+      locale: locale,
       theme: ThemeData(
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         scaffoldBackgroundColor: customTheme.background,
         useMaterial3: true,
         textTheme: TextTheme(
@@ -61,11 +68,20 @@ class MyApp extends StatelessWidget {
         ),
         iconTheme: IconThemeData(color: customTheme.textPrimary),
       ),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       home: FutureBuilder(
         future: _getInitialScreen(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           } else if (snapshot.hasData) {
             return snapshot.data as Widget;
           } else {

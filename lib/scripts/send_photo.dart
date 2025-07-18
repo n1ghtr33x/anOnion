@@ -23,7 +23,10 @@ Future<void> showSendPhotoWithTextDialog(
             children: [
               // Верхняя панель с кнопкой "Отмена"
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () => Navigator.of(context).pop(),
@@ -45,7 +48,10 @@ Future<void> showSendPhotoWithTextDialog(
 
               // Текстовое поле + кнопка отправить
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     Expanded(

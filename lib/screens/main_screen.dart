@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger/screens/chat/chat_list_screen.dart';
-import 'package:flutter_messenger/screens/profile/profile_screen.dart';
-import 'package:flutter_messenger/screens/settings/settings_screen.dart';
-import 'package:flutter_messenger/themes/theme_provider.dart';
+import '../l10n/app_localizations.dart';
+import '../services/api_service.dart';
+import '../widgets/test.dart';
+import '/../screens/chat/chat_list_screen.dart';
+import '/../screens/settings/settings_screen.dart';
+import '/../themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class MainScreen extends StatefulWidget {
@@ -15,17 +19,35 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   late PageController _pageController;
+  String? _avatarUrl;
+  String username = '';
 
-  final List<Widget> _screens = const [
-    ChatListScreen(),
-    ProfileScreen(),
-    SettingsScreen(),
+  final List<Widget> _screens = [
+    const ChatListScreen(),
+    const SettingsScreen(),
   ];
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await ApiService.getProfile();
+      if (res.statusCode == 200) {
+        final data = jsonDecode(res.body);
+        if (!mounted) return;
+        setState(() {
+          _avatarUrl = data['photo_url'];
+          username = data['username'] ?? '';
+        });
+      }
+    } catch (e) {
+      // ignore errors
+    }
   }
 
   @override
@@ -61,28 +83,50 @@ class _MainScreenState extends State<MainScreen> {
         },
         children: _screens,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        selectedItemColor: theme.sendButton,
-        unselectedItemColor: theme.textSecondary,
-        backgroundColor: theme.inputBackground,
-        type: BottomNavigationBarType.fixed,
-        elevation: 10,
-        onTap: _onTap,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: 'Чаты',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Профиль',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            label: 'Настройки',
-          ),
-        ],
+      bottomNavigationBar: SizedBox(
+        height: 65,
+        child: BottomNavigationBar(
+          currentIndex: _currentIndex,
+          selectedItemColor: theme.sendButton,
+          unselectedItemColor: theme.textSecondary,
+          backgroundColor: theme.inputBackground,
+          type: BottomNavigationBarType.fixed,
+          elevation: 10,
+          onTap: _onTap,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline),
+              label: AppLocalizations.of(context)!.mainChats,
+            ),
+            BottomNavigationBarItem(
+              icon: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: _currentIndex == 1
+                      ? Border.all(color: theme.sendButton, width: 2)
+                      : null,
+                ),
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: theme.sendButton,
+                  backgroundImage: _avatarUrl != null
+                      ? NetworkImage('http://109.173.168.29:8001$_avatarUrl')
+                      : null,
+                  child: (_avatarUrl == null)
+                      ? Text(
+                          username.isNotEmpty ? username[0].toUpperCase() : '?',
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: theme.intro_buttonText,
+                          ),
+                        )
+                      : null,
+                ),
+              ),
+              label: AppLocalizations.of(context)!.mainSettings,
+            ),
+          ],
+        ),
       ),
       backgroundColor: theme.background,
     );

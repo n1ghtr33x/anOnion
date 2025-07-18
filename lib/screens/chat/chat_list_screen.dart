@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/websocket_service.dart';
 import '/../models/chat.dart';
 import '/../models/message.dart';
@@ -124,7 +125,9 @@ class _ChatListScreenState extends State<ChatListScreen>
         currentUserId = id;
       });
     } else {
-      debugPrint('Ошибка получения профиля: ${response.statusCode}');
+      debugPrint(
+        '${AppLocalizations.of(context)!.chatListProfileError}: ${response.statusCode}',
+      );
     }
   }
 
@@ -196,18 +199,18 @@ class _ChatListScreenState extends State<ChatListScreen>
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Создать чат по username'),
+        title: Text(AppLocalizations.of(context)!.chatListCreateChatByUsername),
         content: TextField(
           controller: usernameController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Username',
-            hintText: 'Введите username',
+            hintText: AppLocalizations.of(context)!.chatListEnterUsername,
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Отмена'),
+            child: Text(AppLocalizations.of(context)!.chatListCancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -236,7 +239,9 @@ class _ChatListScreenState extends State<ChatListScreen>
                     MaterialPageRoute(
                       builder: (_) => ChatScreen(
                         chat: newChat,
-                        chat_name: displayName ?? 'Неизвестно..',
+                        chat_name:
+                            displayName ??
+                            AppLocalizations.of(context)!.chatListUnknown,
                       ),
                     ),
                   );
@@ -248,7 +253,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
-                        'Ошибка создания чата: ${response.statusCode}',
+                        '${AppLocalizations.of(context)!.chatListCreationError}: ${response.statusCode}',
                       ),
                     ),
                   );
@@ -259,7 +264,7 @@ class _ChatListScreenState extends State<ChatListScreen>
               backgroundColor: theme.sendButton,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Создать'),
+            child: Text(AppLocalizations.of(context)!.chatListCreate),
           ),
         ],
       ),
@@ -299,14 +304,14 @@ class _ChatListScreenState extends State<ChatListScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Чаты'),
+        title: Text(AppLocalizations.of(context)!.chatListChats),
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(Icons.add, color: theme.sendButton),
-            tooltip: 'Создать чат',
+            tooltip: AppLocalizations.of(context)!.chatListCreateChat,
             onPressed: () => _showCreateChatDialog(context),
           ),
         ],
@@ -372,7 +377,7 @@ class _ChatListScreenState extends State<ChatListScreen>
             child: filteredChats.isEmpty
                 ? Center(
                     child: Text(
-                      'Пока нет чатов',
+                      AppLocalizations.of(context)!.chatListNoChatsYet,
                       style: TextStyle(
                         color: theme.textSecondary,
                         fontSize: 16,
@@ -396,12 +401,19 @@ class _ChatListScreenState extends State<ChatListScreen>
                       );
 
                       final displayName = otherUser.name ?? '?';
+                      String lastMessage = chat.lastMessage ?? '';
+                      if (chat.lastMessage == '') {
+                        lastMessage = AppLocalizations.of(
+                          context,
+                        )!.chatListPhoto;
+                      }
 
                       return ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
+
                         leading:
                             otherUser.photoUrl != null &&
                                 otherUser.photoUrl!.isNotEmpty
@@ -426,42 +438,56 @@ class _ChatListScreenState extends State<ChatListScreen>
                                   ),
                                 ),
                               ),
-                        title: Text(
-                          displayName,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: theme.textPrimary,
-                            fontSize: 18,
-                          ),
+                        title: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                displayName,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.textPrimary,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                            if (chat.lastMessageTime != null)
+                              Text(
+                                _formatTime(chat.lastMessageTime!),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: theme.textSecondary.withOpacity(0.6),
+                                ),
+                              ),
+                          ],
                         ),
-                        subtitle: chat.lastMessage != null
-                            ? Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      chat.lastMessage!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: theme.textSecondary,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  if (chat.lastMessageTime != null)
-                                    Text(
-                                      _formatTime(chat.lastMessageTime!),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: theme.textSecondary.withOpacity(
-                                          0.6,
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              )
-                            : null,
+                        subtitle: Row(
+                          children: [
+                            if (lastMessage ==
+                                AppLocalizations.of(context)!.chatListPhoto)
+                              Icon(
+                                Icons.photo,
+                                color: theme.sendButton,
+                                size: 20,
+                              ),
+                            Text('\u200A'),
+                            Text('\u200A'),
+                            Text('\u200A'),
+                            Text('\u200A'),
+
+                            Expanded(
+                              child: Text(
+                                lastMessage,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: theme.textSecondary,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
                         onTap: () {
                           Navigator.push(
                             context,

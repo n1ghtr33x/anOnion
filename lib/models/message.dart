@@ -1,4 +1,4 @@
-import 'package:flutter_messenger/models/user.dart';
+import '/../models/user.dart';
 
 class Message {
   final int id;

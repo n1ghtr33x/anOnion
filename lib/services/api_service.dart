@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger/main.dart';
-import 'package:flutter_messenger/screens/auth/login_screen.dart';
+import '/../main.dart';
+import '/../screens/auth/login_screen.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const String baseUrl = "http://109.173.168.29:8001/api";

@@ -4,6 +4,7 @@ import 'package:flutter_messenger/screens/main_screen.dart';
 import 'package:flutter_messenger/services/api_service.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../themes/theme_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -31,11 +32,14 @@ class _LoginScreenState extends State<LoginScreen> {
           MaterialPageRoute(builder: (_) => const MainScreen()),
         );
       } else {
-        setState(() => _error = "Неверный логин или пароль");
+        setState(() => _error = AppLocalizations.of(context)!.authLoginInvalid);
       }
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = "Ошибка подключения: $e");
+      setState(
+        () => _error =
+            "${AppLocalizations.of(context)!.authLoginConnectionError}: $e",
+      );
     }
   }
 
@@ -51,14 +55,10 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.lock_outline,
-                size: 80,
-                color: theme.intro_accentText,
-              ),
+              Icon(Icons.lock_outline, size: 80, color: theme.intro_accentText),
               const SizedBox(height: 24),
               Text(
-                "Вход в аккаунт",
+                AppLocalizations.of(context)!.authLoginAccount,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   color: theme.textPrimary,
@@ -70,22 +70,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: Text(
                     _error!,
-                    style: TextStyle(
-                      color: theme.errorAccent,
-                    ),
+                    style: TextStyle(color: theme.errorAccent),
                   ),
                 ),
               TextField(
                 controller: _userController,
                 style: TextStyle(color: theme.textPrimary),
                 decoration: InputDecoration(
-                  labelText: 'Логин',
+                  labelText: AppLocalizations.of(context)!.authLogin,
                   filled: true,
                   fillColor: theme.bubbleOther,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelStyle: TextStyle(color: theme.textSecondary)
+                  labelStyle: TextStyle(color: theme.textSecondary),
                 ),
               ),
               const SizedBox(height: 16),
@@ -93,13 +91,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passController,
                 style: TextStyle(color: theme.textPrimary),
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
+                  labelText: AppLocalizations.of(context)!.authLoginPassword,
                   filled: true,
                   fillColor: theme.bubbleOther,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  labelStyle: TextStyle(color: theme.textSecondary)
+                  labelStyle: TextStyle(color: theme.textSecondary),
                 ),
                 obscureText: true,
               ),
@@ -116,10 +114,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   child: Text(
-                    "Войти",
-                    style: TextStyle(
-                      color: theme.intro_buttonText,
-                    ),
+                    AppLocalizations.of(context)!.authLoginLogIn,
+                    style: TextStyle(color: theme.intro_buttonText),
                   ),
                 ),
               ),
@@ -131,10 +127,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   );
                 },
                 child: Text(
-                  "Регистрация",
-                  style: TextStyle(
-                    color: theme.intro_primaryText,
-                  ),
+                  AppLocalizations.of(context)!.authLoginSignUp,
+                  style: TextStyle(color: theme.intro_primaryText),
                 ),
               ),
             ],

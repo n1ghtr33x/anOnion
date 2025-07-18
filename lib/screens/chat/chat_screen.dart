@@ -2,8 +2,8 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_messenger/scripts/send_photo.dart';
-import 'package:flutter_messenger/themes/theme_provider.dart';
+import '/../scripts/send_photo.dart';
+import '/../themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 import '../../models/chat.dart';
 import '../../models/message.dart';
@@ -16,7 +16,8 @@ import '../../widgets/message_bubble.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
-// <--- вот он
+
+import '../../l10n/app_localizations.dart'; // импорт локализации
 
 class ChatScreen extends StatefulWidget {
   final Chat chat;
@@ -81,7 +82,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         final base64Image = base64Encode(bytes);
         final mimeType = lookupMimeType(file.path) ?? 'image/jpeg';
 
-        // Отправляем один пакет с фото + текстом
         _webSocketService.sendImageWithText(
           userId: currentUserId,
           base64Image: base64Image,
@@ -98,9 +98,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       final json = jsonDecode(res.body);
       if (!mounted) return;
       setState(() {
-        currentUserId = json['id']; // или User.fromJson(json).id
+        currentUserId = json['id'];
       });
-    } else {}
+    }
   }
 
   void _sendMessage() {
@@ -147,16 +147,18 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Редактировать сообщение'),
+        title: Text(AppLocalizations.of(context)!.chatEditMessage),
         content: TextField(
           controller: controller,
           maxLines: null,
-          decoration: const InputDecoration(hintText: 'Введите новый текст'),
+          decoration: InputDecoration(
+            hintText: AppLocalizations.of(context)!.chatNewText,
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
+            child: Text(AppLocalizations.of(context)!.chatCancel),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -164,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               await _editMessage(message.id, controller.text);
               _loadMessages();
             },
-            child: const Text('Сохранить'),
+            child: Text(AppLocalizations.of(context)!.chatSave),
           ),
         ],
       ),
@@ -173,26 +175,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
   Future<void> _editMessage(int messageId, String content) async {
     _webSocketService.editMessage(currentUserId, content, messageId);
-    // final res = await ApiService.editMessage(messageId, content);
-    // if (res.statusCode != 200) {
-    //   ScaffoldMessenger.of(
-    //     context,
-    //   ).showSnackBar(SnackBar(content: Text('Ошибка редактирования')));
-    // }
   }
 
   Future<void> _deleteMessage(int messageId) async {
     _webSocketService.deleteMessage(currentUserId, messageId);
-    // final res = await ApiService.deleteMessage(messageId);
-    // if (res.statusCode == 200) {
-    //   setState(() {
-    //     messages.removeWhere((m) => m.id == messageId);
-    //   });
-    // } else {
-    //   ScaffoldMessenger.of(
-    //     context,
-    //   ).showSnackBar(const SnackBar(content: Text('Ошибка удаления')));
-    // }
   }
 
   @override
@@ -215,12 +201,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
         items: [
           TelegramPopupItem(
             icon: Icons.edit,
-            label: 'Редактировать',
+            label: AppLocalizations.of(context)!.chatEdit,
             onTap: () => _showEditMessageDialog(message),
           ),
           TelegramPopupItem(
             icon: Icons.delete,
-            label: 'Удалить',
+            label: AppLocalizations.of(context)!.chatDelete,
             onTap: () => _deleteMessage(message.id),
           ),
         ],
@@ -277,17 +263,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       ),
       body: Stack(
         children: [
-          // Фон
           Positioned.fill(
             child: Image.asset(theme.chatBackgroundPath, fit: BoxFit.cover),
           ),
-
-          // Затемнение (опционально, можно убрать)
           Positioned.fill(
-            child: Container(color: Colors.black.withValues(alpha: 0.03)),
+            child: Container(color: Colors.black.withOpacity(0.03)),
           ),
-
-          // Основной контент
           Column(
             children: [
               Expanded(
@@ -343,7 +324,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                             focusNode: _focusNode,
                             textAlignVertical: TextAlignVertical.center,
                             decoration: InputDecoration(
-                              hintText: 'Сообщение',
+                              hintText: AppLocalizations.of(
+                                context,
+                              )!.chatMessage,
                               border: InputBorder.none,
                               hintStyle: TextStyle(
                                 fontSize: 13,
