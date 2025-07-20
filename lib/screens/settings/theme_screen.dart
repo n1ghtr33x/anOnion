@@ -36,26 +36,28 @@ class ThemeScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 28),
                 SizedBox(
-                  height: 100.0,
+                  height: 200.0,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     physics: const BouncingScrollPhysics(),
                     children: provider.allThemes.map((item) {
-                            return _chatImage(
-                              context,
-                              item.bubbleMine,
-                              item.bubbleOther,
-                              [item.background, item.chat_inputPanel_panelBg],
-                              item.name,
-                              selected: item == theme,
-                              tap: () => provider.setTheme(item),
-                              theme: item,
-                            );
-                          }).toList(),
-                        ),
+                      return _chatImage(
+                        context,
+                        item.bubbleMine,
+                        item.bubbleOther,
+                        [
+                          item.background.withOpacity(0.8),
+                          item.chat_inputPanel_panelBg,
+                        ],
+                        item.name,
+                        selected: item == theme,
+                        tap: () => provider.setTheme(item),
+                        theme: item,
+                      );
+                    }).toList(),
                   ),
-                
+                ),
               ],
             ),
           ),
@@ -65,11 +67,20 @@ class ThemeScreen extends StatelessWidget {
   }
 }
 
-Widget _chatImage(BuildContext context, Color bubbleMine, Color bubbleOther, List<Color> background, String name, {required void Function() tap, required bool selected, required CustomTheme theme}) {
+Widget _chatImage(
+  BuildContext context,
+  Color bubbleMine,
+  Color bubbleOther,
+  List<Color> background,
+  String name, {
+  required void Function() tap,
+  required bool selected,
+  required CustomTheme theme,
+}) {
   return GestureDetector(
     onTap: tap,
     child: Container(
-      width: 80.0,
+      width: 150.0,
       margin: const EdgeInsets.only(right: 12.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -87,7 +98,7 @@ Widget _chatImage(BuildContext context, Color bubbleMine, Color bubbleOther, Lis
           // Верхняя часть (поле для сообщения)
           Container(
             height: 20.0,
-            width: 60,
+            width: 80,
             margin: const EdgeInsets.all(4.0),
             decoration: BoxDecoration(
               color: bubbleMine,
@@ -96,7 +107,43 @@ Widget _chatImage(BuildContext context, Color bubbleMine, Color bubbleOther, Lis
           ),
           Container(
             height: 20.0,
-            width: 45,
+            width: 50,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: bubbleOther,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          Container(
+            height: 20.0,
+            width: 30,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: bubbleMine,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          Container(
+            height: 20.0,
+            width: 120,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: bubbleOther,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          Container(
+            height: 20.0,
+            width: 100,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: bubbleMine,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          Container(
+            height: 20.0,
+            width: 70,
             margin: const EdgeInsets.all(4.0),
             decoration: BoxDecoration(
               color: bubbleOther,
@@ -105,11 +152,8 @@ Widget _chatImage(BuildContext context, Color bubbleMine, Color bubbleOther, Lis
           ),
           Container(
             alignment: Alignment.bottomCenter,
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              name,
-              style: TextStyle(color: theme.textPrimary),
-            ),
+            padding: const EdgeInsets.only(bottom: 6.0),
+            child: Text(name, style: TextStyle(color: theme.textPrimary)),
           ),
         ],
       ),

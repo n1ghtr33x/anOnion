@@ -83,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
         children: _screens,
       ),
       bottomNavigationBar: SizedBox(
-        height: 86,
+        height: 65,
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           selectedItemColor: theme.sendButton,

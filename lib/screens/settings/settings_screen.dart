@@ -128,93 +128,94 @@ class _SettingsScreenState extends State<SettingsScreen> {
         centerTitle: true,
         actions: [
           TextButton(
-            onPressed: () {  },
-            child: Text(
-              'Изм.',
-               style: TextStyle(color: theme.sendButton),
-               ),
+            onPressed: () {},
+            child: Text('Изм.', style: TextStyle(color: theme.sendButton)),
           ),
-          ]
+        ],
       ),
       backgroundColor: theme.background,
       body: Column(
         children: [
-          GestureDetector(
-            onTap: _toggleExpand,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeInOut,
-              width: _expanded ? expandedSize : collapsedSize,
-              height: _expanded ? expandedSize : collapsedSize,
-              margin: EdgeInsets.only(top: 20, bottom: _expanded ? 20 : 10),
-              decoration: BoxDecoration(
-                color: theme.sendButton,
-                shape: BoxShape
-                    .rectangle, // обязательно rectangle, чтобы работал borderRadius
-                borderRadius: BorderRadius.circular(
-                  _expanded ? 20 : collapsedSize / 2,
-                ),
-                image: _avatarUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(
-                          'http://109.173.168.29:8001$_avatarUrl',
-                        ),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
-              child: Stack(
-                children: [
-                  if (_avatarUrl == null)
-                    Center(
-                      child: Text(
-                        username.isNotEmpty ? username[0].toUpperCase() : '?',
-                        style: TextStyle(
-                          fontSize: _expanded ? 64 : 32,
-                          color: theme.intro_buttonText,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  AnimatedPositioned(
-                    duration: const Duration(milliseconds: 400),
-                    curve: Curves.easeInOut,
-                    bottom: _expanded ? 20 : 10,
-                    left: _expanded ? 20 : 0,
-                    right: _expanded ? null : 0,
-                    child: AnimatedAlign(
-                      duration: const Duration(milliseconds: 400),
-                      alignment: _expanded
-                          ? Alignment.bottomLeft
-                          : Alignment.center,
-                      child: Text(
-                        name.isNotEmpty ? name : username,
-                        style: TextStyle(
-                          fontSize: _expanded ? 28 : 22,
-                          color: Colors.white,
-                          shadows: const [
-                            Shadow(
-                              blurRadius: 4,
-                              color: Colors.black54,
-                              offset: Offset(1, 1),
-                            ),
-                          ],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                const SizedBox(height: 24),
+                GestureDetector(
+                  onTap: _toggleExpand,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeInOut,
+                    width: _expanded ? expandedSize : collapsedSize,
+                    height: _expanded ? expandedSize : collapsedSize,
+                    margin: EdgeInsets.only(
+                      top: 20,
+                      bottom: _expanded ? 20 : 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.sendButton,
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(
+                        _expanded ? 20 : collapsedSize / 2,
+                      ),
+                      image: _avatarUrl != null
+                          ? DecorationImage(
+                              image: NetworkImage(
+                                'http://109.173.168.29:8001$_avatarUrl',
+                              ),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                    ),
+                    child: Stack(
+                      children: [
+                        if (_avatarUrl == null)
+                          Center(
+                            child: Text(
+                              username.isNotEmpty
+                                  ? username[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                fontSize: _expanded ? 64 : 32,
+                                color: theme.intro_buttonText,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        AnimatedPositioned(
+                          duration: const Duration(milliseconds: 400),
+                          curve: Curves.easeInOut,
+                          bottom: _expanded ? 20 : 10,
+                          left: _expanded ? 20 : 0,
+                          right: _expanded ? null : 0,
+                          child: AnimatedAlign(
+                            duration: const Duration(milliseconds: 400),
+                            alignment: _expanded
+                                ? Alignment.bottomLeft
+                                : Alignment.center,
+                            child: Text(
+                              name.isNotEmpty ? name : username,
+                              style: TextStyle(
+                                fontSize: _expanded ? 28 : 22,
+                                color: Colors.white,
+                                shadows: const [
+                                  Shadow(
+                                    blurRadius: 4,
+                                    color: Colors.black54,
+                                    offset: Offset(1, 1),
+                                  ),
+                                ],
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
                 _buildSettingsGroup(context, group1, theme),
-                const SizedBox(height: 12),
               ],
             ),
           ),
@@ -229,27 +230,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
     theme,
   ) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0), // Отступы по бокам
+      margin: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: BoxDecoration(
-        color: theme.settingsListItemBackground, // Темный фон для группы
-        borderRadius: BorderRadius.circular(
-          10,
-        ), // Скругленные углы для всей группы
+        color: theme.settingsListItemBackground,
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Column(
         children: items.map((item) {
-          // Для каждого элемента создаем SettingsListItem
-          // И добавляем Divider между элементами, кроме последнего
           return Column(
             children: [
               SettingsListItem(item: item),
-              if (item !=
-                  items
-                      .last) // Если это не последний элемент в группе, добавляем разделитель
+              if (item != items.last)
                 Divider(
                   height: 1,
                   color: theme.textPrimary.withOpacity(0.2),
-                  indent: 60, // Отступ слева (ширина иконки + пробел)
+                  indent: 60,
                   endIndent: 0,
                 ),
             ],
@@ -287,14 +282,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               const SizedBox(height: 6),
               Text(
-                loc.settingsAppVersion, // "Версия 0.0.3"
+                loc.settingsAppVersion,
                 style: TextStyle(fontSize: 14, color: theme.textSecondary),
               ),
               const SizedBox(height: 12),
               Divider(color: theme.textSecondary.withOpacity(0.2)),
               const SizedBox(height: 12),
               Text(
-                loc.settingsAppAuthor, // "Автор: @dima_luts\n© 2025 Все права защищены."
+                loc.settingsAppAuthor,
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: theme.textSecondary),
               ),
