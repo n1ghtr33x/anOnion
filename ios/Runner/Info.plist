@@ -46,6 +46,6 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Это необходимо для сохранения изображений в галерею</string>
+	<string>Нужно для сохранения фото в галерею</string>
 </dict>
 </plist>

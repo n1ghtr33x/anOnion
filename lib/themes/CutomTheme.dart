@@ -48,15 +48,15 @@ class CustomTheme {
       175,
       175,
       175,
-    ), // list_secondaryText
-    inputBackground: const Color(0xFF131C26), // chat_inputPanel_inputBg
-    bubbleMine: const Color(0xFF5D7F93), // пример из outgoing bubble
-    bubbleOther: const Color(0xFF21303F), // incoming bubble bg
-    bubleMineOther: const Color(0xFF2D3B49), // highlighted bubble
-    sendButton: const Color(0xFF2EA5FF), // root_navBar_button / accent\
-    chat_inputPanel_panelBg: const Color(0xFF21303F), // chat_inputPanel_panelBg
+    ),
+    inputBackground: const Color(0xFF131C26),
+    bubbleMine: const Color(0xFF5D7F93),
+    bubbleOther: const Color(0xFF21303F),
+    bubleMineOther: const Color(0xFF2D3B49),
+    sendButton: const Color(0xFF2EA5FF),
+    chat_inputPanel_panelBg: const Color(0xFF21303F),
     errorAccent: Colors.redAccent,
-    chatBackgroundPath: 'assets/dark_wallpaper.png', // твой путь к обоям
+    chatBackgroundPath: 'assets/dark_wallpaper.png',
     intro_statusBar: const Color(0xFFFFFFFF),
     intro_primaryText: const Color(0xFFFFFFFF),
     intro_buttonText: const Color(0xFFFFFFFF),
@@ -66,27 +66,19 @@ class CustomTheme {
       25,
       36,
       49,
-    ), // Темный фон для группы
+    ),
   );
 
   static CustomTheme light() => CustomTheme(
     name: 'Светлая',
-    background: const Color.fromARGB(255, 241, 241, 241), // chatList_bg
-    textPrimary: const Color(0xFF000000), // chat_message_incoming_primaryText
-    textSecondary: const Color(
-      0x8A525252,
-    ), // chat_message_incoming_secondaryText
-    inputBackground: const Color(0xFFFFFFFF), // chat_inputPanel_inputBg
-    bubbleMine: const Color(
-      0xFFE1FFC7,
-    ), // chat_message_outgoing_bubble_withWp_bg
-    bubbleOther: const Color(
-      0xFFFFFFFF,
-    ), // chat_message_incoming_bubble_withWp_bg
-    bubleMineOther: const Color(
-      0xFFD9F4FF,
-    ), // chat_message_incoming_bubble_withWp_highlightedBg
-    sendButton: const Color(0xFF007AFF), // chat_inputPanel_actionControlBg
+    background: const Color(0xFFF1F1F1),
+    textPrimary: const Color(0xFF000000),
+    textSecondary: const Color(0x8A525252),
+    inputBackground: const Color(0xFFFFFFFF),
+    bubbleMine: const Color(0xFFE1FFC7),
+    bubbleOther: const Color(0xFFFFFFFF),
+    bubleMineOther: const Color(0xFFD9F4FF),
+    sendButton: const Color(0xFF007AFF),
     chat_inputPanel_panelBg: const Color(0xF2F2F2E5),
     errorAccent: Colors.redAccent,
     chatBackgroundPath: 'assets/white_wallpaper.png',
@@ -94,6 +86,6 @@ class CustomTheme {
     intro_primaryText: const Color(0xFF000000),
     intro_buttonText: const Color(0xFFFFFFFF),
     intro_accentText: const Color(0xFF2EA5FF),
-    settingsListItemBackground: Colors.white, // Светлый фон для группы
+    settingsListItemBackground: Colors.white,
   );
 }

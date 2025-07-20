@@ -126,6 +126,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
         centerTitle: true,
+        actions: [
+          TextButton(
+            onPressed: () {  },
+            child: Text(
+              'Изм.',
+               style: TextStyle(color: theme.sendButton),
+               ),
+          ),
+          ]
       ),
       backgroundColor: theme.background,
       body: Column(

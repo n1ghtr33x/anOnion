@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_messenger/themes/CutomTheme.dart';
 import 'package:provider/provider.dart';
 
 import '../../l10n/app_localizations.dart';
-import '../../models/setting_item.dart';
 import '../../themes/theme_provider.dart';
-import '../../widgets/settings_list_item.dart';
 
 class ThemeScreen extends StatelessWidget {
   const ThemeScreen({super.key});
@@ -12,18 +11,8 @@ class ThemeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>().theme;
+    final provider = context.read<ThemeProvider>();
     final loc = AppLocalizations.of(context)!;
-
-    final List<SettingItem> group1 = [
-      SettingItem(
-        icon: Icons.palette,
-        iconColor: theme.sendButton, // Цвет иконки как на фото
-        title: loc.settingsThemeChoice,
-        titleStyle: theme.textPrimary,
-        trailingText: '${loc.settingsCurrent}: ${theme.name}',
-        onTap: () => _showThemeDialog(context),
-      ),
-    ];
 
     return Scaffold(
       appBar: AppBar(
@@ -31,6 +20,13 @@ class ThemeScreen extends StatelessWidget {
         backgroundColor: theme.inputBackground,
         foregroundColor: theme.textPrimary,
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: theme.sendButton, size: 28.0),
+          onPressed: () => Navigator.pop(context),
+          highlightColor: Colors.transparent, // Убираем подсветку
+          hoverColor: Colors.transparent,
+          splashColor: Colors.transparent, // Убираем эффект "всплеска"
+        ),
       ),
       body: Column(
         children: [
@@ -38,9 +34,28 @@ class ThemeScreen extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                const SizedBox(height: 24),
-                _buildSettingsGroup(context, group1, theme),
-                const SizedBox(height: 12),
+                const SizedBox(height: 28),
+                SizedBox(
+                  height: 100.0,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    physics: const BouncingScrollPhysics(),
+                    children: provider.allThemes.map((item) {
+                            return _chatImage(
+                              context,
+                              item.bubbleMine,
+                              item.bubbleOther,
+                              [item.background, item.chat_inputPanel_panelBg],
+                              item.name,
+                              selected: item == theme,
+                              tap: () => provider.setTheme(item),
+                              theme: item,
+                            );
+                          }).toList(),
+                        ),
+                  ),
+                
               ],
             ),
           ),
@@ -50,69 +65,53 @@ class ThemeScreen extends StatelessWidget {
   }
 }
 
-Widget _buildSettingsGroup(
-  BuildContext context,
-  List<SettingItem> items,
-  theme,
-) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16.0), // Отступы по бокам
-    decoration: BoxDecoration(
-      color: theme.settingsListItemBackground, // Темный фон для группы
-      borderRadius: BorderRadius.circular(
-        10,
-      ), // Скругленные углы для всей группы
-    ),
-    child: Column(
-      children: items.map((item) {
-        // Для каждого элемента создаем SettingsListItem
-        // И добавляем Divider между элементами, кроме последнего
-        return Column(
-          children: [
-            SettingsListItem(item: item),
-            if (item !=
-                items
-                    .last) // Если это не последний элемент в группе, добавляем разделитель
-              Divider(
-                height: 1,
-                color: theme.textPrimary.withOpacity(0.2),
-                indent: 60, // Отступ слева (ширина иконки + пробел)
-                endIndent: 0,
-              ),
-          ],
-        );
-      }).toList(),
-    ),
-  );
-}
-
-void _showThemeDialog(BuildContext context) {
-  final provider = context.read<ThemeProvider>();
-  final theme = provider.theme;
-  final allThemes = provider.allThemes;
-  final loc = AppLocalizations.of(context)!;
-
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(
-        loc.settingsChooseTheme, // "Выберите тему"
-        style: TextStyle(color: theme.textPrimary),
+Widget _chatImage(BuildContext context, Color bubbleMine, Color bubbleOther, List<Color> background, String name, {required void Function() tap, required bool selected, required CustomTheme theme}) {
+  return GestureDetector(
+    onTap: tap,
+    child: Container(
+      width: 80.0,
+      margin: const EdgeInsets.only(right: 12.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [background[0], background[1]],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+        border: selected ? Border.all(color: Colors.blue, width: 2.0) : null,
+        borderRadius: BorderRadius.circular(10.0),
       ),
-      backgroundColor: theme.background,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: allThemes.map((t) {
-          return RadioListTile(
-            title: Text(t.name, style: TextStyle(color: theme.textPrimary)),
-            value: t.name,
-            groupValue: theme.name,
-            onChanged: (_) {
-              provider.setTheme(t);
-              Navigator.pop(context);
-            },
-          );
-        }).toList(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Верхняя часть (поле для сообщения)
+          Container(
+            height: 20.0,
+            width: 60,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: bubbleMine,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          Container(
+            height: 20.0,
+            width: 45,
+            margin: const EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              color: bubbleOther,
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+          ),
+          Container(
+            alignment: Alignment.bottomCenter,
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Text(
+              name,
+              style: TextStyle(color: theme.textPrimary),
+            ),
+          ),
+        ],
       ),
     ),
   );

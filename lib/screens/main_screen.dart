@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../l10n/app_localizations.dart';
 import '../services/api_service.dart';
-import '../widgets/test.dart';
 import '/../screens/chat/chat_list_screen.dart';
 import '/../screens/settings/settings_screen.dart';
 import '/../themes/theme_provider.dart';
@@ -84,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
         children: _screens,
       ),
       bottomNavigationBar: SizedBox(
-        height: 65,
+        height: 86,
         child: BottomNavigationBar(
           currentIndex: _currentIndex,
           selectedItemColor: theme.sendButton,

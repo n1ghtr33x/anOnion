@@ -1,8 +1,8 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:gal/gal.dart';
 import 'package:dio/dio.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class FullScreenImageViewer extends StatelessWidget {
@@ -12,38 +12,34 @@ class FullScreenImageViewer extends StatelessWidget {
 
   Future<void> _downloadImage(BuildContext context) async {
     try {
+      // Запрос разрешений
       if (Platform.isAndroid || Platform.isIOS) {
-        final status = await Permission.storage.request();
-        if (!status.isGranted) {
+        final permission = await Permission.photos.request();
+        if (!permission.isGranted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Нет доступа к хранилищу")),
+            const SnackBar(content: Text('Нет доступа к фото')),
           );
           return;
         }
       }
 
-      final response = await Dio().get<Uint8List>(
-        imageUrl,
-        options: Options(responseType: ResponseType.bytes),
-      );
+      // Скачиваем файл во временное хранилище
+      final dir = await getTemporaryDirectory();
+      final filename = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final filePath = '${dir.path}/$filename';
 
-      final result = await ImageGallerySaver.saveImage(
-        Uint8List.fromList(response.data!),
-        quality: 100,
-        name: "image_${DateTime.now().millisecondsSinceEpoch}",
-      );
+      await Dio().download(imageUrl, filePath);
 
-      if ((result['isSuccess'] ?? false) == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Фото сохранено в галерею")),
-        );
-      } else {
-        throw Exception("Сохранение не удалось");
-      }
+      // Сохраняем в галерею
+      await Gal.putImage(filePath);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Фото сохранено в галерею')),
+      );
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Ошибка при сохранении: $e")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка при сохранении: $e')),
+      );
     }
   }
 
