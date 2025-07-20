@@ -41,14 +41,9 @@ class CustomTheme {
 
   static CustomTheme dark() => CustomTheme(
     name: 'Тёмная',
-    background: const Color(0xFF18222D), // chatList_bg
-    textPrimary: const Color(0xFFFFFFFF), // list_primaryText
-    textSecondary: const Color.fromARGB(
-      255,
-      175,
-      175,
-      175,
-    ),
+    background: const Color(0xFF18222D),
+    textPrimary: const Color(0xFFFFFFFF),
+    textSecondary: const Color.fromARGB(255, 175, 175, 175),
     inputBackground: const Color(0xFF131C26),
     bubbleMine: const Color(0xFF5D7F93),
     bubbleOther: const Color(0xFF21303F),
@@ -61,12 +56,7 @@ class CustomTheme {
     intro_primaryText: const Color(0xFFFFFFFF),
     intro_buttonText: const Color(0xFFFFFFFF),
     intro_accentText: const Color(0xFF2EA5FF),
-    settingsListItemBackground: const Color.fromARGB(
-      255,
-      25,
-      36,
-      49,
-    ),
+    settingsListItemBackground: const Color.fromARGB(255, 25, 36, 49),
   );
 
   static CustomTheme light() => CustomTheme(
@@ -87,5 +77,45 @@ class CustomTheme {
     intro_buttonText: const Color(0xFFFFFFFF),
     intro_accentText: const Color(0xFF2EA5FF),
     settingsListItemBackground: Colors.white,
+  );
+
+  static CustomTheme warm() => CustomTheme(
+    name: 'Теплая',
+    background: const Color(0xFFF5E8D3),
+    textPrimary: const Color(0xFF3C2F2F),
+    textSecondary: const Color(0x8A6B4E31),
+    inputBackground: const Color(0xFFFDFAF6),
+    bubbleMine: const Color(0xFFFFDAB9),
+    bubbleOther: const Color(0xFFF0E6DC),
+    bubleMineOther: const Color(0xFFE8C4A0),
+    sendButton: const Color(0xFFFF8C42),
+    chat_inputPanel_panelBg: const Color(0xFFEDE0D4),
+    errorAccent: Colors.redAccent,
+    chatBackgroundPath: 'assets/warm_wallpaper.png',
+    intro_statusBar: const Color(0xFF3C2F2F),
+    intro_primaryText: const Color(0xFF3C2F2F),
+    intro_buttonText: const Color(0xFFFFFFFF),
+    intro_accentText: const Color(0xFFFF8C42),
+    settingsListItemBackground: const Color(0xFFF9F1E7),
+  );
+
+  static CustomTheme crimson() => CustomTheme(
+    name: 'Бордовый',
+    background: const Color(0xFF2C1F2A),
+    textPrimary: const Color(0xFFD8A7B1),
+    textSecondary: const Color(0x8A9B6F7A),
+    inputBackground: const Color(0xFF3A2C36),
+    bubbleMine: const Color(0xFF7A4A52),
+    bubbleOther: const Color(0xFF9B5F67), 
+    bubleMineOther: const Color(0xFF3A2C36),
+    sendButton: const Color(0xFFC0392B),
+    chat_inputPanel_panelBg: const Color(0xFF2F2430),
+    errorAccent: Colors.redAccent,
+    chatBackgroundPath: 'assets/crimson_wallpaper.png',
+    intro_statusBar: const Color(0xFFD8A7B1),
+    intro_primaryText: const Color(0xFFD8A7B1),
+    intro_buttonText: const Color(0xFFFFFFFF),
+    intro_accentText: const Color(0xFFC0392B),
+    settingsListItemBackground: const Color(0xFF362A34),
   );
 }

@@ -50,6 +50,7 @@ flutter:
   assets:
     - assets/dark_wallpaper.png
     - assets/white_wallpaper.png
+    - assets/
 
   uses-material-design: true
 

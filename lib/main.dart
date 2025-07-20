@@ -13,8 +13,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
   final savedTheme = prefs.getString('theme') ?? 'Тёмная';
-  final customThemes = [CustomTheme.dark(), CustomTheme.light()];
-
+  final customThemes = [CustomTheme.dark(), 
+  CustomTheme.light(), 
+  CustomTheme.warm(),
+  CustomTheme.crimson()];
   final initialTheme = customThemes.firstWhere(
     (theme) => theme.name == savedTheme,
     orElse: () => customThemes.first,

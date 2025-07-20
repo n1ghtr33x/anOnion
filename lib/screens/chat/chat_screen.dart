@@ -296,12 +296,18 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               ),
               Container(
                 color: theme.chat_inputPanel_panelBg,
+                constraints: const BoxConstraints(
+                  minHeight: 60,
+                  maxHeight: 120,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 8,
+                    vertical: 16,
                   ),
+
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       IconButton(
                         icon: Icon(Icons.photo, color: theme.sendButton),
@@ -309,7 +315,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                       ),
                       Expanded(
                         child: Container(
-                          height: 30,
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           decoration: BoxDecoration(
                             color: theme.inputBackground,
@@ -317,24 +322,27 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
                           ),
                           child: TextField(
                             style: TextStyle(
-                              fontSize: 15,
+                              fontSize: 14,
                               color: theme.textPrimary,
                             ),
                             controller: _controller,
                             focusNode: _focusNode,
+                            cursorColor: theme.textPrimary,
                             textAlignVertical: TextAlignVertical.center,
+                            maxLines: null,
+                            keyboardType: TextInputType.multiline,
                             decoration: InputDecoration(
                               hintText: AppLocalizations.of(
                                 context,
                               )!.chatMessage,
                               border: InputBorder.none,
                               hintStyle: TextStyle(
-                                fontSize: 13,
+                                fontSize: 12,
                                 color: theme.textSecondary,
                               ),
                               isCollapsed: true,
                               contentPadding: const EdgeInsets.symmetric(
-                                vertical: 12,
+                                vertical: 10,
                               ),
                             ),
                             onSubmitted: (_) => _sendMessage(),

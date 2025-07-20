@@ -41,21 +41,25 @@ class ThemeScreen extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     physics: const BouncingScrollPhysics(),
-                    children: provider.allThemes.map((item) {
-                      return _chatImage(
-                        context,
-                        item.bubbleMine,
-                        item.bubbleOther,
-                        [
-                          item.background.withOpacity(0.8),
-                          item.chat_inputPanel_panelBg,
-                        ],
-                        item.name,
-                        selected: item == theme,
-                        tap: () => provider.setTheme(item),
-                        theme: item,
-                      );
-                    }).toList(),
+                    children: [
+                      Row(
+                        children: provider.allThemes.map((item) {
+                          return _chatImage(
+                            context,
+                            item.bubbleMine,
+                            item.bubbleOther,
+                            [
+                              item.background.withOpacity(0.8),
+                              item.chat_inputPanel_panelBg,
+                            ],
+                            item.name,
+                            selected: item == theme,
+                            tap: () => provider.setTheme(item),
+                            theme: item,
+                          );
+                        }).toList(),
+                      ),
+                    ],
                   ),
                 ),
               ],
