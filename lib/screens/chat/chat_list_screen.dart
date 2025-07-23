@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/cashe_service.dart';
 import '../../services/websocket_service.dart';
 import '/../models/chat.dart';
 import '/../models/message.dart';
@@ -66,18 +67,18 @@ class _ChatListScreenState extends State<ChatListScreen>
     );
 
     // 📌 Слушай обновления чатов по WebSocket
-    _webSocketService.listenChatUpdates((Chat updatedChat) {
-      setState(() {
-        final index = chats.indexWhere((c) => c.id == updatedChat.id);
-        if (index != -1) {
-          chats[index] = updatedChat;
-          _loadLatestMessages();
-        } else {
-          chats.add(updatedChat);
-          _loadLatestMessages();
-        }
-        _sortChatsByLastMessage();
-      });
+    _webSocketService.listenChatUpdates((Chat updatedChat) async {
+      final index = chats.indexWhere((c) => c.id == updatedChat.id);
+      if (index != -1) {
+        chats[index] = updatedChat;
+      } else {
+        chats.add(updatedChat);
+      }
+      await CacheService.saveChats(chats);
+      _sortChatsByLastMessage();
+      if (!mounted) return;
+      setState(() {});
+      _loadLatestMessages();
     });
   }
 
@@ -90,44 +91,42 @@ class _ChatListScreenState extends State<ChatListScreen>
   }
 
   Future<void> _loadInitialData() async {
-    await _loadCachedLastMessages();
+    final prefs = await SharedPreferences.getInstance();
+    final cached = prefs.getStringList('cached_chats');
     await _loadCurrentUserId();
     await _loadChats();
     await _loadLatestMessages();
   }
 
-  Future<void> _loadCachedLastMessages() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('last_messages');
-    if (jsonString == null) return;
-
-    final Map<String, dynamic> cached = jsonDecode(jsonString);
-    for (var chat in chats) {
-      final cachedData = cached[chat.id.toString()];
-      if (cachedData != null) {
-        chat.lastMessage = cachedData['content'];
-        chat.lastSenderName = cachedData['senderName'];
-        chat.lastMessageTime = DateTime.tryParse(cachedData['createdAt'] ?? '');
-      }
-    }
-  }
-
   Future<void> _loadCurrentUserId() async {
-    final response = await ApiService.getProfile();
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final int id = data['id'];
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('user_id', id);
-      if (!mounted) return;
-      setState(() {
-        currentUserId = id;
-      });
-    } else {
-      debugPrint(
-        '${AppLocalizations.of(context)!.chatListProfileError}: ${response.statusCode}',
-      );
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await ApiService.getProfile();
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final int id = data['id'];
+        await prefs.setInt('user_id', id);
+        if (!mounted) return;
+        setState(() {
+          currentUserId = id;
+        });
+      } else {
+        // Загружаем из кеша, если сервер упал
+        final cachedId = prefs.getInt('user_id');
+        if (cachedId != null) {
+          setState(() {
+            currentUserId = cachedId;
+          });
+        }
+      }
+    } catch (_) {
+      // Загружаем из кеша, если ошибка
+      final cachedId = prefs.getInt('user_id');
+      if (cachedId != null) {
+        setState(() {
+          currentUserId = cachedId;
+        });
+      }
     }
   }
 
@@ -140,26 +139,41 @@ class _ChatListScreenState extends State<ChatListScreen>
         setState(() {
           chats = data.map((json) => Chat.fromJson(json)).toList();
         });
+        await CacheService.saveChats(chats);
+      } else {
+        final cachedChats = await CacheService.loadChats();
+        setState(() {
+          chats = cachedChats;
+        });
       }
-    } catch (_) {}
+    } catch (e) {
+      final cachedChats = await CacheService.loadChats();
+      if (!mounted) return;
+      setState(() {
+        chats = cachedChats;
+      });
+    }
   }
 
   Future<void> _loadLatestMessages() async {
     try {
+      final Map<int, String> latestMessagesMap = {};
+
       final responses = await Future.wait(
         chats.map((chat) async {
           try {
             final response = await ApiService.getMessages(chat.id);
             if (response.statusCode == 200) {
               final data = jsonDecode(response.body);
-
-              // data — это список сообщений
               final messages = (data as List)
                   .map((j) => Message.fromJson(j))
                   .toList();
 
               if (messages.isNotEmpty) {
                 final latest = messages.last;
+
+                // Добавляем в кеш (только строку)
+                latestMessagesMap[chat.id] = latest.content ?? '';
 
                 return {'chatId': chat.id, 'message': latest};
               }
@@ -169,16 +183,20 @@ class _ChatListScreenState extends State<ChatListScreen>
         }),
       );
 
+      // Сохраняем кеш (строки) в SharedPreferences
+      await CacheService.saveLastMessages(latestMessagesMap);
+
       if (!mounted) return;
 
       setState(() {
         for (var result in responses.whereType<Map>()) {
           final chat = chats.firstWhere((c) => c.id == result['chatId']);
           final message = result['message'] as Message;
-          chat.lastMessage = message.content;
+          chat.lastMessage = message.content ?? '';
           chat.lastMessageTime = message.createdAt;
         }
 
+        // Сортируем чаты по времени последнего сообщения
         chats.sort((a, b) {
           final aTime =
               a.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -189,6 +207,32 @@ class _ChatListScreenState extends State<ChatListScreen>
       });
     } catch (e) {
       debugPrint('❌ Ошибка при загрузке сообщений: $e');
+
+      // При ошибке пытаемся загрузить из кеша
+      final cachedMessages = await CacheService.loadLastMessages();
+
+      if (!mounted) return;
+
+      setState(() {
+        for (final chat in chats) {
+          final message = cachedMessages[chat.id];
+          if (message != null) {
+            chat.lastMessage = message;
+            chat.lastMessageTime = null; // Время в кеше не сохраняется
+          } else {
+            chat.lastMessage = '';
+            chat.lastMessageTime = null;
+          }
+        }
+
+        chats.sort((a, b) {
+          final aTime =
+              a.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bTime =
+              b.lastMessageTime ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return bTime.compareTo(aTime);
+        });
+      });
     }
   }
 

@@ -123,7 +123,7 @@ class _MessageBubbleState extends State<MessageBubble>
     String timeText,
     dynamic theme,
   ) {
-    final String baseUrl = 'http://109.173.168.29:8001';
+    final String baseUrl = 'http://anonion.nextlayer.site';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

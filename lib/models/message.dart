@@ -34,4 +34,18 @@ class Message {
     imageUrl: json['image_url'],
     sender: User.fromJson(json['sender']),
   );
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'content': content,
+      'edited': edited,
+      'deleted': deleted,
+      'is_photo': isPhoto,
+      'image_url': imageUrl,
+      'created_at': createdAt.toIso8601String(),
+      'sender': sender.toJson(), // нужно, чтобы User тоже имел toJson
+    };
+  }
 }

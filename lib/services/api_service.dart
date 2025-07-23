@@ -6,7 +6,7 @@ import '/../screens/auth/login_screen.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String baseUrl = "http://109.173.168.29:8001/api";
+const String baseUrl = "http://anonion.nextlayer.site/api";
 
 class ApiService {
   static Future<void> saveTokens(String access, String refresh) async {
@@ -24,6 +24,10 @@ class ApiService {
     final success = await refreshToken();
     if (success) {
       return prefs.getString('access_token');
+    } else {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
     }
 
     return null;
@@ -55,6 +59,9 @@ class ApiService {
   static Future<http.Response> uploadAvatar(File file) async {
     final token = await getAccessToken();
     if (token == null) {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
       throw Exception('Unauthorized');
     }
 
@@ -218,6 +225,10 @@ class ApiService {
       final data = jsonDecode(response.body);
       await saveTokens(data['access_token'], data['refresh_token']);
       return true;
+    } else {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
     }
 
     return false;

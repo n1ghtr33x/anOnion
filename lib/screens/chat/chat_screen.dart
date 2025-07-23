@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../../services/cashe_service.dart';
 import '/../scripts/send_photo.dart';
 import '/../themes/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -41,19 +42,35 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Timer? _timer;
 
   Future<void> _loadMessages() async {
-    final res = await ApiService.getMessages(widget.chat.id);
-    if (res.statusCode == 200) {
-      final List jsonList = jsonDecode(res.body);
+    try {
+      final res = await ApiService.getMessages(widget.chat.id);
+      if (res.statusCode == 200) {
+        final List jsonList = jsonDecode(res.body);
+        final fetchedMessages = jsonList
+            .map((m) => Message.fromJson(m))
+            .toList();
+
+        if (!mounted) return;
+
+        setState(() {
+          messages = fetchedMessages;
+        });
+
+        // Сохраняем сообщения в кеш
+        await CacheService.saveMessages(widget.chat.id, fetchedMessages);
+      }
+    } catch (e) {
+      debugPrint('Ошибка загрузки сообщений с сервера: $e');
+
+      // При ошибке — загружаем из кеша
+      final cachedMessages = await CacheService.loadMessages(widget.chat.id);
       if (!mounted) return;
       setState(() {
-        messages = jsonList.map((m) => Message.fromJson(m)).toList();
-        if (messages.isNotEmpty) {}
+        messages = cachedMessages;
       });
-      for (var m in messages) {
-        print('Msg id=${m.id} isPhoto=${m.isPhoto} imageUrl=${m.imageUrl}');
-      }
-      _scrollToBottom();
     }
+
+    _scrollToBottom();
   }
 
   Future<void> _scrollToBottom() async {

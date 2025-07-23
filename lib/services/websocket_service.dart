@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../main.dart';
+import '../screens/auth/login_screen.dart';
 import '/../models/message.dart';
 import '/../models/chat.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -21,16 +23,18 @@ class WebSocketService {
     final token = await ApiService.getAccessToken();
 
     _channel = WebSocketChannel.connect(
-      Uri.parse('ws://109.173.168.29:8001/ws/chat/$chatId?token=$token'),
+      Uri.parse('ws://anonion.nextlayer.site/ws/chat/$chatId?token=$token'),
     );
 
     _edit = WebSocketChannel.connect(
-      Uri.parse('ws://109.173.168.29:8001/ws/chat/edit/$chatId?token=$token'),
+      Uri.parse(
+        'ws://anonion.nextlayer.site/ws/chat/edit/$chatId?token=$token',
+      ),
     );
 
     _chats = WebSocketChannel.connect(
       Uri.parse(
-        'ws://109.173.168.29:8001/ws/chats?token=$token',
+        'ws://anonion.nextlayer.site/ws/chats?token=$token',
       ), // твой сервер
     );
 
@@ -42,6 +46,9 @@ class WebSocketService {
         final message = Message.fromJson(jsonData);
         onMessage(message);
       } catch (e, st) {
+        navigatorKey.currentState?.pushReplacement(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
         debugPrint('❌ Ошибка в _channel.stream: $e\n$st');
       }
     });
@@ -54,6 +61,9 @@ class WebSocketService {
         final message = Message.fromJson(jsonData);
         onMessage(message);
       } catch (e, st) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
         debugPrint('❌ Ошибка в _edit.stream: $e\n$st');
       }
     });
@@ -75,6 +85,9 @@ class WebSocketService {
           _onChatUpdate!(updatedChat);
         }
       } catch (e, st) {
+        navigatorKey.currentState?.push(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
         debugPrint('❌ Ошибка в _chats.stream: $e\n$st');
       }
     });

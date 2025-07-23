@@ -9,9 +9,14 @@ class User {
     id: json['id'],
     name: json['name'],
     photoUrl: json['photo_url'] != null
-        ? 'http://109.173.168.29:8001${json['photo_url']}'
+        ? 'http://anonion.nextlayer.site${json['photo_url']}'
         : null,
   );
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'photo_url': photoUrl, // <-- ключ должен совпадать с fromJson
+  };
 }
 
 class Chat {
@@ -38,5 +43,18 @@ class Chat {
     users: (json['users'] as List<dynamic>)
         .map((u) => User.fromJson(u))
         .toList(),
+    lastMessageTime: json['last_message_time'] != null
+        ? DateTime.parse(json['last_message_time'])
+        : null,
+    lastSenderName: json['last_sender_name'],
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'last_message': lastMessage,
+    'users': users.map((u) => u.toJson()).toList(),
+    'last_message_time': lastMessageTime?.toIso8601String(),
+    'last_sender_name': lastSenderName,
+  };
 }

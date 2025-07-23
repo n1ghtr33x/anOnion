@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/setting_item.dart';
 import '../../services/api_service.dart';
+import '../../services/cashe_service.dart';
 import '../../widgets/settings_list_item.dart';
 import '/../screens/auth/login_screen.dart';
 import '/../themes/theme_provider.dart';
@@ -45,17 +46,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadProfile() async {
     try {
       final res = await ApiService.getProfile();
+
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
+
+        await CacheService.saveProfile(data['username'] ?? '');
+        await CacheService.saveName(data['name'] ?? '');
+
         if (!mounted) return;
         setState(() {
           username = data['username'] ?? '';
           name = data['name'] ?? '';
           _avatarUrl = data['photo_url'];
         });
+      } else {
+        final cachedUsername = await CacheService.loadProfile();
+        final cachedName = await CacheService.loadName();
+
+        if (!mounted) return;
+        setState(() {
+          username = cachedUsername;
+          name = cachedName;
+          _avatarUrl = null;
+        });
       }
     } catch (e) {
-      // Игнорируем ошибки загрузки
+      final cachedUsername = await CacheService.loadProfile();
+      final cachedName = await CacheService.loadName();
+
+      if (!mounted) return;
+      setState(() {
+        username = cachedUsername;
+        name = cachedName;
+        _avatarUrl = null;
+      });
     }
   }
 
@@ -160,7 +184,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       image: _avatarUrl != null
                           ? DecorationImage(
                               image: NetworkImage(
-                                'http://109.173.168.29:8001$_avatarUrl',
+                                'http://anonion.nextlayer.site$_avatarUrl',
                               ),
                               fit: BoxFit.cover,
                             )
