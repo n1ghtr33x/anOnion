@@ -91,8 +91,6 @@ class _ChatListScreenState extends State<ChatListScreen>
   }
 
   Future<void> _loadInitialData() async {
-    final prefs = await SharedPreferences.getInstance();
-    final cached = prefs.getStringList('cached_chats');
     await _loadCurrentUserId();
     await _loadChats();
     await _loadLatestMessages();

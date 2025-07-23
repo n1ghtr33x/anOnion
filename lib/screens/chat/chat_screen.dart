@@ -18,7 +18,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 
-import '../../l10n/app_localizations.dart'; // импорт локализации
+import '../../l10n/app_localizations.dart';
+import 'user_info_screen.dart'; // импорт локализации
 
 class ChatScreen extends StatefulWidget {
   final Chat chat;
@@ -244,38 +245,93 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
     return Scaffold(
       backgroundColor: theme.background,
-      appBar: AppBar(
-        backgroundColor: theme.inputBackground,
-        foregroundColor: theme.textPrimary,
-        centerTitle: true,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: otherUser.photoUrl != null
-                  ? NetworkImage(otherUser.photoUrl!)
-                  : null,
-              backgroundColor: theme.sendButton,
-              child: otherUser.photoUrl == null
-                  ? Text(
-                      (otherUser.name ?? '?').isNotEmpty
-                          ? otherUser.name![0].toUpperCase()
-                          : '?',
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              widget.chat_name,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 18,
-                color: theme.textPrimary,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => UserInfoScreen(user: otherUser),
               ),
+            );
+          },
+          child: Container(
+            color: theme.background,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Центр
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.6,
+                    ),
+                    child: Text(
+                      widget.chat_name,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 18,
+                        color: theme.textPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+
+                // Назад
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.arrow_back_ios,
+                          color: theme.sendButton,
+                          size: 28.0,
+                        ),
+                        Text(
+                          'Back',
+                          style: TextStyle(
+                            color: theme.sendButton,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Аватар
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: CircleAvatar(
+                    radius: 16,
+                    backgroundImage: otherUser.photoUrl != null
+                        ? NetworkImage(otherUser.photoUrl!)
+                        : null,
+                    backgroundColor: theme.sendButton,
+                    child: otherUser.photoUrl == null
+                        ? Text(
+                            (otherUser.name ?? '?').isNotEmpty
+                                ? otherUser.name![0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       body: Stack(
